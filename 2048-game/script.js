@@ -1,233 +1,426 @@
-const boardSize = 4;
-let board = [];
-let score = 0;
-let bestScore = 0;
-let moves = 0;
-let timer = 0;
-let timerInterval;
-let gameMode = "classic"; // classic | timed | chaos
+// 2048 — стабильные сдвиги/слияния по линиям + плавная анимация + спавн рядом с кубами
 
-// DOM элементы
-const boardContainer = document.getElementById("game-board");
-const scoreElem = document.getElementById("score");
-const bestScoreElem = document.getElementById("best-score");
-const movesElem = document.getElementById("moves");
-const timeElem = document.getElementById("time");
-const gameOverModal = document.getElementById("game-over");
-const winModal = document.getElementById("win-message");
+(() => {
+  const SIZE = 4;
+  const CELL = 75;
+  const GAP = 12;
+  const STEP = CELL + GAP;            // 87px
+  const MOVE_MS = 200;                // длительность анимации перемещения/слияния
 
-// кнопки
-document.getElementById("new-game-btn").addEventListener("click", () => startGame("classic"));
-document.getElementById("timed-mode-btn").addEventListener("click", () => startGame("timed"));
-document.getElementById("chaos-mode-btn").addEventListener("click", () => startGame("chaos"));
-document.getElementById("restart-btn").addEventListener("click", () => startGame(gameMode));
-document.getElementById("new-game-win-btn").addEventListener("click", () => startGame("classic"));
-document.getElementById("continue-btn").addEventListener("click", () => {
-    winModal.style.display = "none";
-});
+  let NEXT_ID = 1;
 
-// запуск игры
-function startGame(mode = "classic") {
-    gameMode = mode;
-    score = 0;
-    moves = 0;
-    timer = 0;
-    clearInterval(timerInterval);
+  class Tile {
+    constructor(value, row, col) {
+      this.id = NEXT_ID++;
+      this.value = value;
+      this.row = row;
+      this.col = col;
+    }
+  }
 
-    if (gameMode === "timed") {
-        timer = 120; // 2 минуты
-        timerInterval = setInterval(() => {
-            timer--;
-            updateTime();
-            if (timer <= 0) {
-                clearInterval(timerInterval);
-                endGame();
+  class Game2048 {
+    constructor() {
+      this.size = SIZE;
+      this.grid = this.emptyGrid();
+      this.tiles = [];
+      this.tileEls = {};    // id -> DOM
+      this.score = 0;
+      this.bestScore = Number(localStorage.getItem('2048-best-score') || 0);
+      this.moves = 0;
+      this.isAnimating = false;
+      this.gameOver = false;
+      this.gameWon = false;
+
+      this.startTime = Date.now();
+      this.timer = setInterval(() => this.updateTimer(), 1000);
+
+      this.init();
+    }
+
+    emptyGrid() {
+      return Array.from({ length: this.size }, () => Array(this.size).fill(null));
+    }
+
+    init() {
+      this.drawStaticGrid();
+      this.addRandomTile(true);
+      this.addRandomTile(true);
+      this.updateDisplay();
+      this.setupControls();
+    }
+
+    drawStaticGrid() {
+      const board = document.getElementById('game-board');
+      board.innerHTML = '';
+      for (let r = 0; r < this.size; r++) {
+        for (let c = 0; c < this.size; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.style.transform = `translate(${c * STEP}px, ${r * STEP}px)`;
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    updateTimer() {
+      if (this.gameOver || this.gameWon) return;
+      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+      const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const ss = String(elapsed % 60).padStart(2, '0');
+      const t = document.getElementById('time');
+      if (t) t.textContent = `${mm}:${ss}`;
+    }
+
+    // Спавн в пустой клетке с приоритетом соседних к занятым
+    addRandomTile(initial = false) {
+      const empty = [];
+      const neighbor = [];
+      for (let r = 0; r < this.size; r++) {
+        for (let c = 0; c < this.size; c++) {
+          if (!this.grid[r][c]) {
+            empty.push({ r, c });
+            const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+            for (const [dr, dc] of dirs) {
+              const nr = r + dr, nc = c + dc;
+              if (nr>=0 && nr<this.size && nc>=0 && nc<this.size) {
+                if (this.grid[nr][nc]) { neighbor.push({ r, c }); break; }
+              }
             }
-        }, 1000);
+          }
+        }
+      }
+      if (!empty.length) return;
+
+      const pool = neighbor.length ? neighbor : empty;
+      const { r, c } = pool[Math.floor(Math.random() * pool.length)];
+      const val = Math.random() < 0.9 ? 2 : 4;
+      const t = new Tile(val, r, c);
+      this.grid[r][c] = t;
+      this.tiles.push(t);
+
+      // Плавное появление (кроме стартовых можно чуть «попнуть»)
+      this.ensureTileEl(t);
+      const el = this.tileEls[t.id];
+      if (!initial) {
+        el.style.opacity = '0';
+        el.style.transform = `translate(${t.col * STEP}px, ${t.row * STEP}px) scale(0.85)`;
+        requestAnimationFrame(() => {
+          el.style.opacity = '1';
+          el.style.transform = `translate(${t.col * STEP}px, ${t.row * STEP}px) scale(1)`;
+        });
+      } else {
+        el.style.transform = `translate(${t.col * STEP}px, ${t.row * STEP}px)`;
+      }
     }
 
-    board = Array.from({ length: boardSize }, () => Array(boardSize).fill(0));
-    addRandomTile();
-    addRandomTile();
-    updateUI();
-    hideModals();
-}
+    // Построить линии в порядке «сжатия»
+    buildLines(dir) {
+      const lines = [];
+      if (dir === 'left' || dir === 'right') {
+        for (let r = 0; r < this.size; r++) {
+          const line = [];
+          if (dir === 'left')  for (let c = 0; c < this.size; c++) line.push({ r, c });
+          else                 for (let c = this.size - 1; c >= 0; c--) line.push({ r, c });
+          lines.push(line);
+        }
+      } else {
+        for (let c = 0; c < this.size; c++) {
+          const line = [];
+          if (dir === 'up')    for (let r = 0; r < this.size; r++) line.push({ r, c });
+          else                 for (let r = this.size - 1; r >= 0; r--) line.push({ r, c });
+          lines.push(line);
+        }
+      }
+      return lines;
+    }
 
-function hideModals() {
-    gameOverModal.style.display = "none";
-    winModal.style.display = "none";
-}
+    move(dir) {
+      if (this.isAnimating || this.gameOver || this.gameWon) return false;
 
-function updateUI() {
-    boardContainer.innerHTML = "";
-    for (let r = 0; r < boardSize; r++) {
-        for (let c = 0; c < boardSize; c++) {
-            const value = board[r][c];
-            const tile = document.createElement("div");
-            tile.classList.add("tile");
-            if (value) {
-                tile.textContent = value;
-                tile.classList.add(`tile-${value}`);
+      const lines = this.buildLines(dir);
+      let moved = false;
+
+      // Операции текущего хода
+      const moveOps = [];   // { tile, to:{r,c} }
+      const mergeOps = [];  // { a, b, to:{r,c}, newValue }
+
+      // 1) Рассчитываем целевые позиции по каждой линии (линейная логика)
+      for (const line of lines) {
+        const existing = [];
+        for (const pos of line) {
+          const t = this.grid[pos.r][pos.c];
+          if (t) existing.push(t);
+        }
+        if (!existing.length) continue;
+
+        let writeIndex = 0;
+        for (let i = 0; i < existing.length; ) {
+          const cur = existing[i];
+          if (i + 1 < existing.length && existing[i + 1].value === cur.value) {
+            // слияние cur + next
+            const next = existing[i + 1];
+            const dest = line[writeIndex];               // куда приезжает пара
+            moveOps.push({ tile: cur,  to: { r: dest.r, c: dest.c } });
+            moveOps.push({ tile: next, to: { r: dest.r, c: dest.c } });
+            mergeOps.push({ a: cur, b: next, to: { r: dest.r, c: dest.c }, newValue: cur.value * 2 });
+            writeIndex++;
+            i += 2;
+          } else {
+            // просто переезд cur
+            const dest = line[writeIndex];
+            moveOps.push({ tile: cur, to: { r: dest.r, c: dest.c } });
+            writeIndex++;
+            i += 1;
+          }
+        }
+      }
+
+      // 2) Если нет ни перемещений, ни слияний — выходим
+      moved = moveOps.some(op => op.tile.row !== op.to.r || op.tile.col !== op.to.c) || mergeOps.length > 0;
+      if (!moved) return false;
+
+      // 3) Обновляем координаты тайлов для анимации (grid пока не трогаем)
+      for (const op of moveOps) {
+        op.tile.row = op.to.r;
+        op.tile.col = op.to.c;
+      }
+
+      // 4) Анимируем перемещения
+      this.isAnimating = true;
+      this.updateDisplay();
+
+      // 5) По завершении анимации применяем слияния и полностью пересобираем grid
+      setTimeout(() => {
+        // применить слияния: удалить a/b, создать новый nt
+        const board = document.getElementById('game-board');
+        for (const m of mergeOps) {
+          // убрать a и b из списка
+          this.tiles = this.tiles.filter(t => t !== m.a && t !== m.b);
+
+          // мягко убрать DOM старых
+          for (const old of [m.a, m.b]) {
+            const el = this.tileEls[old.id];
+            if (el) {
+              el.style.opacity = '0';
+              el.style.transform = `translate(${old.col * STEP}px, ${old.row * STEP}px) scale(0.85)`;
+              setTimeout(() => el.parentNode && el.parentNode.removeChild(el), MOVE_MS * 0.6);
             }
-            boardContainer.appendChild(tile);
+            delete this.tileEls[old.id];
+          }
+
+          // создать новый
+          const nt = new Tile(m.newValue, m.to.r, m.to.c);
+          this.tiles.push(nt);
+          this.score += m.newValue;
+
+          // DOM нового тайла с «попом»
+          const el = document.createElement('div');
+          el.className = 'tile';
+          el.dataset.value = nt.value;
+          el.textContent = nt.value;
+          el.style.position = 'absolute';
+          el.style.transition = `transform ${MOVE_MS}ms ease, opacity ${MOVE_MS}ms ease`;
+          el.style.transform = `translate(${nt.col * STEP}px, ${nt.row * STEP}px) scale(1.12)`;
+          el.style.opacity = '0';
+          board.appendChild(el);
+          this.tileEls[nt.id] = el;
+
+          requestAnimationFrame(() => {
+            el.style.opacity = '1';
+            el.style.transform = `translate(${nt.col * STEP}px, ${nt.row * STEP}px) scale(1)`;
+          });
         }
-    }
 
-    scoreElem.textContent = score;
-    bestScore = Math.max(bestScore, score);
-    bestScoreElem.textContent = bestScore;
-    movesElem.textContent = moves;
-    updateTime();
-}
-
-function updateTime() {
-    if (gameMode === "timed") {
-        let min = Math.floor(timer / 60);
-        let sec = timer % 60;
-        timeElem.textContent = `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-    } else {
-        let min = Math.floor(timer / 60);
-        let sec = timer % 60;
-        timeElem.textContent = `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-    }
-}
-
-function addRandomTile() {
-    let emptyCells = [];
-    for (let r = 0; r < boardSize; r++) {
-        for (let c = 0; c < boardSize; c++) {
-            if (board[r][c] === 0) emptyCells.push({ r, c });
+        // Полностью пересобираем grid из актуальных tiles (это убирает «залипания»)
+        this.grid = this.emptyGrid();
+        for (const t of this.tiles) {
+          this.grid[t.row][t.col] = t;
         }
+
+        // Добавляем новую плитку после всех слияний
+        this.addRandomTile();
+
+        // Финальный апдейт и проверки
+        this.updateDisplay();
+        this.isAnimating = false;
+        this.moves++;
+        this.checkGameState();
+      }, MOVE_MS + 10);
+
+      return true;
     }
 
-    if (emptyCells.length === 0) return;
-
-    const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-
-    if (gameMode === "chaos" && moves > 0 && moves % 10 === 0) {
-        const specials = [8, 16, 32];
-        board[r][c] = specials[Math.floor(Math.random() * specials.length)];
-    } else {
-        board[r][c] = Math.random() < 0.9 ? 2 : 4;
+    // Рендер/обновление DOM
+    ensureTileEl(t) {
+      let el = this.tileEls[t.id];
+      if (!el) {
+        const board = document.getElementById('game-board');
+        el = document.createElement('div');
+        el.className = 'tile';
+        el.dataset.value = t.value;
+        el.textContent = t.value;
+        el.style.position = 'absolute';
+        el.style.transition = `transform ${MOVE_MS}ms ease, opacity ${MOVE_MS}ms ease`;
+        board.appendChild(el);
+        this.tileEls[t.id] = el;
+      }
+      return el;
     }
-}
 
-function slide(row) {
-    row = row.filter(v => v);
-    for (let i = 0; i < row.length - 1; i++) {
-        if (row[i] === row[i + 1]) {
-            row[i] *= 2;
-            score += row[i];
-            row[i + 1] = 0;
+    updateDisplay() {
+      // удалить DOM тех, кого уже нет
+      for (const id in this.tileEls) {
+        if (!this.tiles.find(t => String(t.id) === String(id))) {
+          const el = this.tileEls[id];
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+          delete this.tileEls[id];
+        }
+      }
 
-            if (row[i] === 2048) {
-                winModal.style.display = "flex";
-                document.getElementById("win-score").textContent = score;
+      // обновить/создать DOM существующих
+      for (const t of this.tiles) {
+        const el = this.ensureTileEl(t);
+        // обновить визуальное значение, не трогая дизайн
+        if (el.dataset.value !== String(t.value)) {
+          el.dataset.value = t.value;
+          el.textContent = t.value;
+        }
+        const target = `translate(${t.col * STEP}px, ${t.row * STEP}px)`;
+        requestAnimationFrame(() => { el.style.transform = target; el.style.opacity = '1'; });
+      }
+
+      // счётчики
+      const s = document.getElementById('score');
+      const bs = document.getElementById('best-score');
+      const mv = document.getElementById('moves');
+      if (s) s.textContent = this.score;
+      if (this.score > this.bestScore) {
+        this.bestScore = this.score;
+        localStorage.setItem('2048-best-score', this.bestScore);
+      }
+      if (bs) bs.textContent = this.bestScore;
+      if (mv) mv.textContent = this.moves;
+    }
+
+    hasMoves() {
+      // пустые клетки
+      for (let r = 0; r < this.size; r++)
+        for (let c = 0; c < this.size; c++)
+          if (!this.grid[r][c]) return true;
+
+      // соседние равны?
+      const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+      for (let r = 0; r < this.size; r++) {
+        for (let c = 0; c < this.size; c++) {
+          const t = this.grid[r][c];
+          if (!t) continue;
+          for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc;
+            if (nr>=0 && nr<this.size && nc>=0 && nc<this.size) {
+              const n = this.grid[nr][nc];
+              if (n && n.value === t.value) return true;
             }
+          }
         }
+      }
+      return false;
     }
-    row = row.filter(v => v);
-    while (row.length < boardSize) {
-        row.push(0);
+
+    checkGameState() {
+      if (!this.gameWon && this.tiles.some(t => t.value === 2048)) {
+        this.gameWon = true;
+        const ws = document.getElementById('win-score');
+        const wm = document.getElementById('win-message');
+        if (ws) ws.textContent = this.score;
+        if (wm) wm.style.display = 'flex';
+        return;
+      }
+      if (!this.hasMoves()) {
+        this.gameOver = true;
+        clearInterval(this.timer);
+        const fs = document.getElementById('final-score');
+        const fbs = document.getElementById('final-best-score');
+        const go = document.getElementById('game-over');
+        if (fs) fs.textContent = this.score;
+        if (fbs) fbs.textContent = this.bestScore;
+        if (go) go.style.display = 'flex';
+      }
     }
-    return row;
-}
 
-function moveLeft() {
-    let moved = false;
-    for (let r = 0; r < boardSize; r++) {
-        let newRow = slide(board[r]);
-        if (JSON.stringify(newRow) !== JSON.stringify(board[r])) moved = true;
-        board[r] = newRow;
+    newGame() {
+      clearInterval(this.timer);
+      NEXT_ID = 1;
+      this.grid = this.emptyGrid();
+      this.tiles = [];
+      this.tileEls = {};
+      this.score = 0;
+      this.moves = 0;
+      this.isAnimating = false;
+      this.gameOver = false;
+      this.gameWon = false;
+
+      this.drawStaticGrid();
+      this.addRandomTile(true);
+      this.addRandomTile(true);
+      this.updateDisplay();
+
+      this.startTime = Date.now();
+      this.timer = setInterval(() => this.updateTimer(), 1000);
+
+      const go = document.getElementById('game-over');
+      const wm = document.getElementById('win-message');
+      if (go) go.style.display = 'none';
+      if (wm) wm.style.display = 'none';
     }
-    return moved;
-}
 
-function moveRight() {
-    let moved = false;
-    for (let r = 0; r < boardSize; r++) {
-        let row = board[r].slice().reverse();
-        row = slide(row);
-        row.reverse();
-        if (JSON.stringify(row) !== JSON.stringify(board[r])) moved = true;
-        board[r] = row;
+    setupControls() {
+      // клавиатура
+      window.addEventListener('keydown', (e) => {
+        const key = e.key;
+        let dir = null;
+        if (['ArrowLeft','a','A'].includes(key))  dir = 'left';
+        if (['ArrowRight','d','D'].includes(key)) dir = 'right';
+        if (['ArrowUp','w','W'].includes(key))    dir = 'up';
+        if (['ArrowDown','s','S'].includes(key))  dir = 'down';
+        if (!dir) return;
+        e.preventDefault();
+        this.move(dir);
+      });
+
+      // тач
+      let sx=0, sy=0, isSwiping=false, st=0;
+      document.addEventListener('touchstart', (e) => {
+        if (this.isAnimating || this.gameOver) return;
+        const t = e.touches[0];
+        sx = t.clientX; sy = t.clientY; st = Date.now(); isSwiping = true;
+      }, { passive: true });
+
+      document.addEventListener('touchend', (e) => {
+        if (!isSwiping || this.isAnimating || this.gameOver) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - sx, dy = t.clientY - sy;
+        const dur = Date.now() - st;
+        if (dur < 60) { isSwiping = false; return; }
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) { isSwiping = false; return; }
+        const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+        this.move(dir);
+        isSwiping = false;
+      }, { passive: true });
+
+      // кнопки
+      const ng = document.getElementById('new-game-btn');
+      if (ng) ng.onclick = () => this.newGame();
+      const rb = document.getElementById('restart-btn');
+      if (rb) rb.onclick = () => this.newGame();
+      const cont = document.getElementById('continue-btn');
+      if (cont) cont.onclick = () => { const wm = document.getElementById('win-message'); if (wm) wm.style.display = 'none'; };
+      const ngw = document.getElementById('new-game-win-btn');
+      if (ngw) ngw.onclick = () => this.newGame();
     }
-    return moved;
-}
+  }
 
-function moveUp() {
-    let moved = false;
-    for (let c = 0; c < boardSize; c++) {
-        let col = [];
-        for (let r = 0; r < boardSize; r++) col.push(board[r][c]);
-        col = slide(col);
-        for (let r = 0; r < boardSize; r++) {
-            if (board[r][c] !== col[r]) moved = true;
-            board[r][c] = col[r];
-        }
-    }
-    return moved;
-}
-
-function moveDown() {
-    let moved = false;
-    for (let c = 0; c < boardSize; c++) {
-        let col = [];
-        for (let r = 0; r < boardSize; r++) col.push(board[r][c]);
-        col.reverse();
-        col = slide(col);
-        col.reverse();
-        for (let r = 0; r < boardSize; r++) {
-            if (board[r][c] !== col[r]) moved = true;
-            board[r][c] = col[r];
-        }
-    }
-    return moved;
-}
-
-function handleMove(direction) {
-    let moved = false;
-    if (direction === "left") moved = moveLeft();
-    if (direction === "right") moved = moveRight();
-    if (direction === "up") moved = moveUp();
-    if (direction === "down") moved = moveDown();
-
-    if (moved) {
-        moves++;
-        addRandomTile();
-        updateUI();
-
-        if (isGameOver()) {
-            endGame();
-        }
-    }
-}
-
-function isGameOver() {
-    for (let r = 0; r < boardSize; r++) {
-        for (let c = 0; c < boardSize; c++) {
-            if (board[r][c] === 0) return false;
-            if (c < boardSize - 1 && board[r][c] === board[r][c + 1]) return false;
-            if (r < boardSize - 1 && board[r][c] === board[r + 1][c]) return false;
-        }
-    }
-    return true;
-}
-
-function endGame() {
-    gameOverModal.style.display = "flex";
-    document.getElementById("final-score").textContent = score;
-    document.getElementById("final-best-score").textContent = bestScore;
-    clearInterval(timerInterval);
-}
-
-// управление
-window.addEventListener("keydown", (e) => {
-    if (["ArrowLeft", "a", "A"].includes(e.key)) handleMove("left");
-    if (["ArrowRight", "d", "D"].includes(e.key)) handleMove("right");
-    if (["ArrowUp", "w", "W"].includes(e.key)) handleMove("up");
-    if (["ArrowDown", "s", "S"].includes(e.key)) handleMove("down");
-});
-
-// запуск при загрузке
-startGame("classic");
+  // Запуск
+  document.addEventListener('DOMContentLoaded', () => {
+    new Game2048();
+  });
+})();
