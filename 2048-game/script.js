@@ -477,8 +477,6 @@
   }
 
   window.addEventListener("DOMContentLoaded", () => {
-    const game = resetGame();
-    // Сохраняем ссылку на game для использования в глобальном контексте
-    window.game = game;
+    window.game = resetGame();
   });
 })();
