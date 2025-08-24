@@ -110,8 +110,8 @@
     </div>
 
     <div class="action-buttons">
-      <button id="undo-btn">↩️ Отменить ход (15)</button>
-      <button id="hint-btn">💡 Подсказка (15)</button>
+      <button id="undo-btn">↩️ Отменить ход</button>
+      <button id="hint-btn">💡 Подсказка</button>
     </div>
 
     <div class="game-stats">
@@ -160,8 +160,6 @@
 
     function updateEnergy() {
       energyEl.textContent = energy;
-      undoBtn.disabled = energy < 15;
-      hintBtn.disabled = energy < 15;
       if (energy <= 0) {
         alert("Энергия закончилась! 🔋 Подождите или обновите игру.");
         return false;
@@ -190,13 +188,13 @@
     });
 
     undoBtn.addEventListener("click", () => {
-      if (window.game && updateEnergy()) {
+      if (window.game) {
         window.game.undoMove();
       }
     });
 
     hintBtn.addEventListener("click", () => {
-      if (window.game && updateEnergy()) {
+      if (window.game) {
         window.game.getHint();
       }
     });
