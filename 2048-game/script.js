@@ -1,43 +1,57 @@
-// 2048 — стабильные сдвиги/слияния по линиям + плавная анимация + спавн рядом с кубами
-
 (() => {
   const SIZE = 4;
   const CELL = 75;
   const GAP = 12;
-  const STEP = CELL + GAP;            // 87px
-  const MOVE_MS = 200;                // длительность анимации перемещения/слияния
+  const STEP = CELL + GAP;
+  const MOVE_MS = 300;
 
   let NEXT_ID = 1;
 
   class Tile {
-    constructor(value, row, col) {
+    constructor(value, row, col, opts = {}) {
       this.id = NEXT_ID++;
       this.value = value;
       this.row = row;
       this.col = col;
+      this.special = !!opts.special;
+      this.kind = opts.kind || null;
+      this.used = false;
     }
   }
 
   class Game2048 {
     constructor() {
       this.size = SIZE;
-      this.grid = this.emptyGrid();
+      this.grid = this.empty();
       this.tiles = [];
-      this.tileEls = {};    // id -> DOM
+      this.tileEls = Object.create(null);
       this.score = 0;
-      this.bestScore = Number(localStorage.getItem('2048-best-score') || 0);
+      this.best = Number(localStorage.getItem("best-score") || 0);
       this.moves = 0;
+      this.mode = "classic";
+      this.specialCount = 0;
       this.isAnimating = false;
-      this.gameOver = false;
-      this.gameWon = false;
+      this.won = false;
+      this.over = false;
+      this.startTs = Date.now();
+      this.timer = null;
+      this.history = [];
 
-      this.startTime = Date.now();
-      this.timer = setInterval(() => this.updateTimer(), 1000);
+      this.$board = document.getElementById("game-board");
+      this.$score = document.getElementById("score");
+      this.$best = document.getElementById("best-score");
+      this.$moves = document.getElementById("moves");
+      this.$time = document.getElementById("time");
+      this.$gameOver = document.getElementById("game-over");
+      this.$finalScore = document.getElementById("final-score");
+      this.$finalBest = document.getElementById("final-best-score");
+      this.$win = document.getElementById("win-message");
+      this.$winScore = document.getElementById("win-score");
 
       this.init();
     }
 
-    emptyGrid() {
+    empty() {
       return Array.from({ length: this.size }, () => Array(this.size).fill(null));
     }
 
@@ -45,382 +59,426 @@
       this.drawStaticGrid();
       this.addRandomTile(true);
       this.addRandomTile(true);
-      this.updateDisplay();
+      this.saveState();
+      this.updateHUD();
       this.setupControls();
+      this.startTimer();
+      this.renderAll();
     }
 
     drawStaticGrid() {
-      const board = document.getElementById('game-board');
-      board.innerHTML = '';
+      this.$board.innerHTML = "";
       for (let r = 0; r < this.size; r++) {
         for (let c = 0; c < this.size; c++) {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
+          const cell = document.createElement("div");
+          cell.className = "cell";
           cell.style.transform = `translate(${c * STEP}px, ${r * STEP}px)`;
-          board.appendChild(cell);
+          this.$board.appendChild(cell);
         }
       }
     }
 
-    updateTimer() {
-      if (this.gameOver || this.gameWon) return;
-      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-      const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-      const ss = String(elapsed % 60).padStart(2, '0');
-      const t = document.getElementById('time');
-      if (t) t.textContent = `${mm}:${ss}`;
+    startTimer() {
+      this.timer && clearInterval(this.timer);
+      this.startTs = Date.now();
+      this.timer = setInterval(() => {
+        if (this.over || this.won) return;
+        const s = Math.floor((Date.now() - this.startTs) / 1000);
+        const mm = String(Math.floor(s / 60)).padStart(2, "0");
+        const ss = String(s % 60).padStart(2, "0");
+        if (this.$time) this.$time.textContent = `${mm}:${ss}`;
+      }, 1000);
     }
 
-    // Спавн в пустой клетке с приоритетом соседних к занятым
-    addRandomTile(initial = false) {
-      const empty = [];
-      const neighbor = [];
-      for (let r = 0; r < this.size; r++) {
-        for (let c = 0; c < this.size; c++) {
-          if (!this.grid[r][c]) {
-            empty.push({ r, c });
-            const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-            for (const [dr, dc] of dirs) {
-              const nr = r + dr, nc = c + dc;
-              if (nr>=0 && nr<this.size && nc>=0 && nc<this.size) {
-                if (this.grid[nr][nc]) { neighbor.push({ r, c }); break; }
-              }
+    setupControls() {
+      document.addEventListener("keydown", (e) => {
+        const k = e.key;
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", "W", "A", "S", "D"].includes(k)) {
+          e.preventDefault();
+          const map = {
+            ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+            w: "up", a: "left", s: "down", d: "right", W: "up", A: "left", S: "down", D: "right"
+          };
+          this.move(map[k]);
+        }
+      });
+
+      const area = this.$board;
+      let sx = 0, sy = 0, start = 0, swiping = false;
+      area.addEventListener("touchstart", (e) => {
+        if (this.isAnimating || this.over || this.won) return;
+        const t = e.touches[0];
+        sx = t.clientX;
+        sy = t.clientY;
+        start = Date.now();
+        swiping = true;
+      }, { passive: true });
+
+      area.addEventListener("touchend", (e) => {
+        if (!swiping || this.isAnimating || this.over || this.won) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - sx, dy = t.clientY - sy;
+        const dur = Date.now() - start;
+        swiping = false;
+        if (dur < 50 || (Math.abs(dx) < 20 && Math.abs(dy) < 20)) return;
+        const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+        this.move(dir);
+      }, { passive: true });
+    }
+
+    updateHUD() {
+      if (this.$score) this.$score.textContent = this.score;
+      if (this.$best) this.$best.textContent = this.best;
+      if (this.$moves) this.$moves.textContent = this.moves;
+    }
+
+    saveState() {
+      const state = {
+        grid: this.grid.map(row => row.map(t => t ? { ...t } : null)),
+        tiles: this.tiles.map(t => ({ ...t })),
+        tileEls: { ...this.tileEls },
+        score: this.score,
+        moves: this.moves,
+        specialCount: this.specialCount,
+        won: this.won,
+        over: this.over
+      };
+      this.history.push(state);
+      if (this.history.length > 10) this.history.shift();
+    }
+
+    undoMove() {
+      if (this.history.length < 2 || this.isAnimating || this.over || this.won) return;
+      this.history.pop();
+      const prevState = this.history[this.history.length - 1];
+      this.grid = prevState.grid.map(row => row.map(t => t ? new Tile(t.value, t.row, t.col, { special: t.special, kind: t.kind }) : null));
+      this.tiles = prevState.tiles.map(t => new Tile(t.value, t.row, t.col, { special: t.special, kind: t.kind }));
+      this.tileEls = Object.create(null);
+      this.score = prevState.score;
+      this.moves = prevState.moves;
+      this.specialCount = prevState.specialCount;
+      this.won = prevState.won;
+      this.over = prevState.over;
+
+      this.$board.innerHTML = "";
+      this.drawStaticGrid();
+      this.renderAll();
+      this.updateHUD();
+    }
+
+    getHint() {
+      if (this.isAnimating || this.over || this.won) return;
+      const directions = ["up", "down", "left", "right"];
+      let bestDir = null;
+      let maxScore = -1;
+
+      for (const dir of directions) {
+        const { score } = this.simulateMove(dir);
+        if (score > maxScore) {
+          maxScore = score;
+          bestDir = dir;
+        }
+      }
+
+      if (bestDir) {
+        this.showHintArrow(bestDir);
+      }
+    }
+
+    simulateMove(dir) {
+      const tempGrid = this.grid.map(row => row.map(t => t ? { ...t } : null));
+      const tempTiles = this.tiles.map(t => ({ ...t }));
+      let tempScore = this.score;
+      const lines = this.buildLines(dir);
+      const moveOps = [];
+      const mergeOps = [];
+
+      for (const line of lines) {
+        const arr = [];
+        for (const p of line) {
+          const t = tempGrid[p.r][p.c];
+          if (t) arr.push(t);
+        }
+        if (!arr.length) continue;
+
+        let write = 0;
+        for (let i = 0; i < arr.length; i++) {
+          const cur = arr[i];
+          if (i + 1 < arr.length) {
+            const next = arr[i + 1];
+            if (cur.value === next.value) {
+              const dst = line[write++];
+              moveOps.push({ tile: cur, to: { r: dst.r, c: dst.c } });
+              moveOps.push({ tile: next, to: { r: dst.r, c: dst.c } });
+              mergeOps.push({ a: cur, b: next, to: { r: dst.r, c: dst.c }, newValue: cur.value * 2 });
+              tempScore += cur.value * 2;
+              i++;
+              continue;
             }
           }
+          const dst = line[write++];
+          moveOps.push({ tile: cur, to: { r: dst.r, c: dst.c } });
+        }
+      }
+
+      return { score: tempScore, moved: moveOps.length > 0 || mergeOps.length > 0 };
+    }
+
+    showHintArrow(dir) {
+      const existingArrow = document.querySelector(".hint-arrow");
+      if (existingArrow) existingArrow.remove();
+
+      const arrow = document.createElement("div");
+      arrow.className = "hint-arrow";
+      const symbols = { up: "↑", down: "↓", left: "←", right: "→" };
+      arrow.textContent = symbols[dir];
+      const boardRect = this.$board.getBoundingClientRect();
+      const centerX = boardRect.width / 2;
+      const centerY = boardRect.height / 2;
+      arrow.style.left = `${centerX - 20}px`;
+      arrow.style.top = `${centerY - 20}px`;
+      this.$board.appendChild(arrow);
+
+      setTimeout(() => {
+        arrow.style.opacity = "0";
+        setTimeout(() => arrow.remove(), 300);
+      }, 1000);
+    }
+
+    addRandomTile(initial = false) {
+      const empty = [];
+      for (let r = 0; r < this.size; r++) {
+        for (let c = 0; c < this.size; c++) {
+          if (!this.grid[r][c]) empty.push({ r, c });
         }
       }
       if (!empty.length) return;
 
-      const pool = neighbor.length ? neighbor : empty;
-      const { r, c } = pool[Math.floor(Math.random() * pool.length)];
-      const val = Math.random() < 0.9 ? 2 : 4;
-      const t = new Tile(val, r, c);
+      const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+      const t = new Tile(Math.random() < 0.9 ? 2 : 4, r, c);
+
       this.grid[r][c] = t;
       this.tiles.push(t);
+      this.ensureTileEl(t, true);
+    }
 
-      // Плавное появление (кроме стартовых можно чуть «попнуть»)
-      this.ensureTileEl(t);
-      const el = this.tileEls[t.id];
-      if (!initial) {
-        el.style.opacity = '0';
-        el.style.transform = `translate(${t.col * STEP}px, ${t.row * STEP}px) scale(0.85)`;
+    ensureTileEl(t, isNew = false) {
+      if (this.tileEls[t.id]) {
+        this.positionEl(this.tileEls[t.id], t);
+        this.refreshLabel(this.tileEls[t.id], t);
+        return;
+      }
+      const el = document.createElement("div");
+      el.className = "tile";
+      el.dataset.value = t.value;
+      el.textContent = t.value;
+      this.positionEl(el, t, true);
+      this.$board.appendChild(el);
+      this.tileEls[t.id] = el;
+      if (isNew) {
         requestAnimationFrame(() => {
-          el.style.opacity = '1';
-          el.style.transform = `translate(${t.col * STEP}px, ${t.row * STEP}px) scale(1)`;
+          el.classList.add("new");
+          setTimeout(() => el.classList.remove("new"), 350);
         });
-      } else {
-        el.style.transform = `translate(${t.col * STEP}px, ${t.row * STEP}px)`;
       }
     }
 
-    // Построить линии в порядке «сжатия»
+    positionEl(el, t, instant = false) {
+      el.style.setProperty("--x", `${t.col * STEP}px`);
+      el.style.setProperty("--y", `${t.row * STEP}px`);
+      if (instant) {
+        el.style.transition = "none";
+        void el.offsetWidth;
+        el.style.transition = "";
+      }
+    }
+
+    refreshLabel(el, t) {
+      el.dataset.value = t.value;
+      el.textContent = t.value;
+    }
+
+    renderAll() {
+      for (const t of this.tiles) this.ensureTileEl(t);
+    }
+
     buildLines(dir) {
-      const lines = [];
-      if (dir === 'left' || dir === 'right') {
+      const L = [];
+      if (dir === "left" || dir === "right") {
         for (let r = 0; r < this.size; r++) {
           const line = [];
-          if (dir === 'left')  for (let c = 0; c < this.size; c++) line.push({ r, c });
-          else                 for (let c = this.size - 1; c >= 0; c--) line.push({ r, c });
-          lines.push(line);
+          if (dir === "left") for (let c = 0; c < this.size; c++) line.push({ r, c });
+          else for (let c = this.size - 1; c >= 0; c--) line.push({ r, c });
+          L.push(line);
         }
       } else {
         for (let c = 0; c < this.size; c++) {
           const line = [];
-          if (dir === 'up')    for (let r = 0; r < this.size; r++) line.push({ r, c });
-          else                 for (let r = this.size - 1; r >= 0; r--) line.push({ r, c });
-          lines.push(line);
+          if (dir === "up") for (let r = 0; r < this.size; r++) line.push({ r, c });
+          else for (let r = this.size - 1; r >= 0; r--) line.push({ r, c });
+          L.push(line);
         }
       }
-      return lines;
+      return L;
     }
 
     move(dir) {
-      if (this.isAnimating || this.gameOver || this.gameWon) return false;
+      if (this.isAnimating || this.over || this.won) return;
+
+      this.saveState();
 
       const lines = this.buildLines(dir);
-      let moved = false;
+      const moveOps = [];
+      const mergeOps = [];
 
-      // Операции текущего хода
-      const moveOps = [];   // { tile, to:{r,c} }
-      const mergeOps = [];  // { a, b, to:{r,c}, newValue }
-
-      // 1) Рассчитываем целевые позиции по каждой линии (линейная логика)
       for (const line of lines) {
-        const existing = [];
-        for (const pos of line) {
-          const t = this.grid[pos.r][pos.c];
-          if (t) existing.push(t);
+        const arr = [];
+        for (const p of line) {
+          const t = this.grid[p.r][p.c];
+          if (t) arr.push(t);
         }
-        if (!existing.length) continue;
+        if (!arr.length) continue;
 
-        let writeIndex = 0;
-        for (let i = 0; i < existing.length; ) {
-          const cur = existing[i];
-          if (i + 1 < existing.length && existing[i + 1].value === cur.value) {
-            // слияние cur + next
-            const next = existing[i + 1];
-            const dest = line[writeIndex];               // куда приезжает пара
-            moveOps.push({ tile: cur,  to: { r: dest.r, c: dest.c } });
-            moveOps.push({ tile: next, to: { r: dest.r, c: dest.c } });
-            mergeOps.push({ a: cur, b: next, to: { r: dest.r, c: dest.c }, newValue: cur.value * 2 });
-            writeIndex++;
-            i += 2;
-          } else {
-            // просто переезд cur
-            const dest = line[writeIndex];
-            moveOps.push({ tile: cur, to: { r: dest.r, c: dest.c } });
-            writeIndex++;
-            i += 1;
+        let write = 0;
+        for (let i = 0; i < arr.length; i++) {
+          const cur = arr[i];
+          if (i + 1 < arr.length) {
+            const next = arr[i + 1];
+            if (cur.value === next.value) {
+              const dst = line[write++];
+              moveOps.push({ tile: cur, to: { r: dst.r, c: dst.c } });
+              moveOps.push({ tile: next, to: { r: dst.r, c: dst.c } });
+              mergeOps.push({ a: cur, b: next, to: { r: dst.r, c: dst.c }, newValue: cur.value * 2 });
+              i++;
+              continue;
+            }
           }
+          const dst = line[write++];
+          moveOps.push({ tile: cur, to: { r: dst.r, c: dst.c } });
         }
       }
 
-      // 2) Если нет ни перемещений, ни слияний — выходим
-      moved = moveOps.some(op => op.tile.row !== op.to.r || op.tile.col !== op.to.c) || mergeOps.length > 0;
-      if (!moved) return false;
+      const anyMove = moveOps.some(op => op.tile.row !== op.to.r || op.tile.col !== op.to.c) || mergeOps.length > 0;
+      if (!anyMove) {
+        this.history.pop();
+        return;
+      }
 
-      // 3) Обновляем координаты тайлов для анимации (grid пока не трогаем)
       for (const op of moveOps) {
         op.tile.row = op.to.r;
         op.tile.col = op.to.c;
       }
-
-      // 4) Анимируем перемещения
       this.isAnimating = true;
-      this.updateDisplay();
 
-      // 5) По завершении анимации применяем слияния и полностью пересобираем grid
+      for (const t of this.tiles) {
+        const el = this.tileEls[t.id];
+        if (el) {
+          el.classList.add("sliding");
+          this.positionEl(el, t);
+        }
+      }
+
       setTimeout(() => {
-        // применить слияния: удалить a/b, создать новый nt
-        const board = document.getElementById('game-board');
         for (const m of mergeOps) {
-          // убрать a и b из списка
-          this.tiles = this.tiles.filter(t => t !== m.a && t !== m.b);
-
-          // мягко убрать DOM старых
           for (const old of [m.a, m.b]) {
             const el = this.tileEls[old.id];
             if (el) {
-              el.style.opacity = '0';
-              el.style.transform = `translate(${old.col * STEP}px, ${old.row * STEP}px) scale(0.85)`;
-              setTimeout(() => el.parentNode && el.parentNode.removeChild(el), MOVE_MS * 0.6);
+              el.style.opacity = "0";
+              el.style.transform = "scale(0.9)";
+              setTimeout(() => el.remove(), 120);
             }
             delete this.tileEls[old.id];
+            this.tiles = this.tiles.filter(x => x !== old);
           }
-
-          // создать новый
           const nt = new Tile(m.newValue, m.to.r, m.to.c);
           this.tiles.push(nt);
+          this.grid[m.to.r][m.to.c] = nt;
           this.score += m.newValue;
 
-          // DOM нового тайла с «попом»
-          const el = document.createElement('div');
-          el.className = 'tile';
+          const el = document.createElement("div");
+          el.className = "tile merged";
           el.dataset.value = nt.value;
           el.textContent = nt.value;
-          el.style.position = 'absolute';
-          el.style.transition = `transform ${MOVE_MS}ms ease, opacity ${MOVE_MS}ms ease`;
-          el.style.transform = `translate(${nt.col * STEP}px, ${nt.row * STEP}px) scale(1.12)`;
-          el.style.opacity = '0';
-          board.appendChild(el);
+          this.positionEl(el, nt, true);
+          this.$board.appendChild(el);
           this.tileEls[nt.id] = el;
-
           requestAnimationFrame(() => {
-            el.style.opacity = '1';
-            el.style.transform = `translate(${nt.col * STEP}px, ${nt.row * STEP}px) scale(1)`;
+            el.classList.remove("merged");
           });
         }
 
-        // Полностью пересобираем grid из актуальных tiles (это убирает «залипания»)
-        this.grid = this.emptyGrid();
-        for (const t of this.tiles) {
-          this.grid[t.row][t.col] = t;
-        }
+        this.grid = this.empty();
+        for (const t of this.tiles) this.grid[t.row][t.col] = t;
 
-        // Добавляем новую плитку после всех слияний
         this.addRandomTile();
-
-        // Финальный апдейт и проверки
-        this.updateDisplay();
-        this.isAnimating = false;
         this.moves++;
-        this.checkGameState();
-      }, MOVE_MS + 10);
+        if (this.score > this.best) {
+          this.best = this.score;
+          localStorage.setItem("best-score", String(this.best));
+        }
 
-      return true;
+        for (const t of this.tiles) {
+          const el = this.tileEls[t.id];
+          el && el.classList.remove("sliding");
+        }
+
+        this.updateHUD();
+        this.isAnimating = false;
+        this.checkEndStates();
+      }, MOVE_MS);
     }
 
-    // Рендер/обновление DOM
-    ensureTileEl(t) {
-      let el = this.tileEls[t.id];
-      if (!el) {
-        const board = document.getElementById('game-board');
-        el = document.createElement('div');
-        el.className = 'tile';
-        el.dataset.value = t.value;
-        el.textContent = t.value;
-        el.style.position = 'absolute';
-        el.style.transition = `transform ${MOVE_MS}ms ease, opacity ${MOVE_MS}ms ease`;
-        board.appendChild(el);
-        this.tileEls[t.id] = el;
-      }
-      return el;
-    }
-
-    updateDisplay() {
-      // удалить DOM тех, кого уже нет
-      for (const id in this.tileEls) {
-        if (!this.tiles.find(t => String(t.id) === String(id))) {
-          const el = this.tileEls[id];
-          if (el && el.parentNode) el.parentNode.removeChild(el);
-          delete this.tileEls[id];
+    checkEndStates() {
+      if (this.tiles.some(t => t.value >= 2048)) {
+        this.won = true;
+        if (this.$win) {
+          this.$winScore && (this.$winScore.textContent = this.score);
+          this.$win.style.display = "flex";
         }
       }
-
-      // обновить/создать DOM существующих
-      for (const t of this.tiles) {
-        const el = this.ensureTileEl(t);
-        // обновить визуальное значение, не трогая дизайн
-        if (el.dataset.value !== String(t.value)) {
-          el.dataset.value = t.value;
-          el.textContent = t.value;
+      if (!this.anyMovesLeft()) {
+        this.over = true;
+        if (this.$gameOver) {
+          this.$finalScore && (this.$finalScore.textContent = this.score);
+          this.$finalBest && (this.$finalBest.textContent = this.best);
+          this.$gameOver.style.display = "flex";
         }
-        const target = `translate(${t.col * STEP}px, ${t.row * STEP}px)`;
-        requestAnimationFrame(() => { el.style.transform = target; el.style.opacity = '1'; });
       }
-
-      // счётчики
-      const s = document.getElementById('score');
-      const bs = document.getElementById('best-score');
-      const mv = document.getElementById('moves');
-      if (s) s.textContent = this.score;
-      if (this.score > this.bestScore) {
-        this.bestScore = this.score;
-        localStorage.setItem('2048-best-score', this.bestScore);
-      }
-      if (bs) bs.textContent = this.bestScore;
-      if (mv) mv.textContent = this.moves;
     }
 
-    hasMoves() {
-      // пустые клетки
-      for (let r = 0; r < this.size; r++)
-        for (let c = 0; c < this.size; c++)
+    anyMovesLeft() {
+      for (let r = 0; r < this.size; r++) {
+        for (let c = 0; c < this.size; c++) {
           if (!this.grid[r][c]) return true;
-
-      // соседние равны?
-      const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+        }
+      }
+      const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
       for (let r = 0; r < this.size; r++) {
         for (let c = 0; c < this.size; c++) {
           const t = this.grid[r][c];
-          if (!t) continue;
-          for (const [dr, dc] of dirs) {
-            const nr = r + dr, nc = c + dc;
-            if (nr>=0 && nr<this.size && nc>=0 && nc<this.size) {
-              const n = this.grid[nr][nc];
-              if (n && n.value === t.value) return true;
+          if (t) {
+            for (const [dr, dc] of dirs) {
+              const nr = r + dr, nc = c + dc;
+              if (nr >= 0 && nr < this.size && nc >= 0 && nc < this.size) {
+                const u = this.grid[nr][nc];
+                if (!u || u.value === t.value) return true;
+              }
             }
           }
         }
       }
       return false;
     }
-
-    checkGameState() {
-      if (!this.gameWon && this.tiles.some(t => t.value === 2048)) {
-        this.gameWon = true;
-        const ws = document.getElementById('win-score');
-        const wm = document.getElementById('win-message');
-        if (ws) ws.textContent = this.score;
-        if (wm) wm.style.display = 'flex';
-        return;
-      }
-      if (!this.hasMoves()) {
-        this.gameOver = true;
-        clearInterval(this.timer);
-        const fs = document.getElementById('final-score');
-        const fbs = document.getElementById('final-best-score');
-        const go = document.getElementById('game-over');
-        if (fs) fs.textContent = this.score;
-        if (fbs) fbs.textContent = this.bestScore;
-        if (go) go.style.display = 'flex';
-      }
-    }
-
-    newGame() {
-      clearInterval(this.timer);
-      NEXT_ID = 1;
-      this.grid = this.emptyGrid();
-      this.tiles = [];
-      this.tileEls = {};
-      this.score = 0;
-      this.moves = 0;
-      this.isAnimating = false;
-      this.gameOver = false;
-      this.gameWon = false;
-
-      this.drawStaticGrid();
-      this.addRandomTile(true);
-      this.addRandomTile(true);
-      this.updateDisplay();
-
-      this.startTime = Date.now();
-      this.timer = setInterval(() => this.updateTimer(), 1000);
-
-      const go = document.getElementById('game-over');
-      const wm = document.getElementById('win-message');
-      if (go) go.style.display = 'none';
-      if (wm) wm.style.display = 'none';
-    }
-
-    setupControls() {
-      // клавиатура
-      window.addEventListener('keydown', (e) => {
-        const key = e.key;
-        let dir = null;
-        if (['ArrowLeft','a','A'].includes(key))  dir = 'left';
-        if (['ArrowRight','d','D'].includes(key)) dir = 'right';
-        if (['ArrowUp','w','W'].includes(key))    dir = 'up';
-        if (['ArrowDown','s','S'].includes(key))  dir = 'down';
-        if (!dir) return;
-        e.preventDefault();
-        this.move(dir);
-      });
-
-      // тач
-      let sx=0, sy=0, isSwiping=false, st=0;
-      document.addEventListener('touchstart', (e) => {
-        if (this.isAnimating || this.gameOver) return;
-        const t = e.touches[0];
-        sx = t.clientX; sy = t.clientY; st = Date.now(); isSwiping = true;
-      }, { passive: true });
-
-      document.addEventListener('touchend', (e) => {
-        if (!isSwiping || this.isAnimating || this.gameOver) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - sx, dy = t.clientY - sy;
-        const dur = Date.now() - st;
-        if (dur < 60) { isSwiping = false; return; }
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) { isSwiping = false; return; }
-        const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
-        this.move(dir);
-        isSwiping = false;
-      }, { passive: true });
-
-      // кнопки
-      const ng = document.getElementById('new-game-btn');
-      if (ng) ng.onclick = () => this.newGame();
-      const rb = document.getElementById('restart-btn');
-      if (rb) rb.onclick = () => this.newGame();
-      const cont = document.getElementById('continue-btn');
-      if (cont) cont.onclick = () => { const wm = document.getElementById('win-message'); if (wm) wm.style.display = 'none'; };
-      const ngw = document.getElementById('new-game-win-btn');
-      if (ngw) ngw.onclick = () => this.newGame();
-    }
   }
 
-  // Запуск
-  document.addEventListener('DOMContentLoaded', () => {
-    new Game2048();
+  function resetGame() {
+    const game = new Game2048();
+    return game;
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const game = resetGame();
+    // Сохраняем ссылку на game для использования в глобальном контексте
+    window.game = game;
   });
 })();
