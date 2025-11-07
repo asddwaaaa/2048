@@ -481,6 +481,25 @@ body.theme-space #chaos-tips {
   }
 }
 .hidden{display:none}
+
+/* === THEMED TILE ANIMATIONS === */
+@keyframes oceanFloat {
+  0%, 100% { transform: translate(var(--tile-x), var(--tile-y)) scale(1) rotate(0deg); }
+  50% { transform: translate(calc(var(--tile-x) + 2px), calc(var(--tile-y) - 3px)) scale(1.05) rotate(1deg); }
+}
+@keyframes forestRustle {
+  0%, 100% { transform: translate(var(--tile-x), var(--tile-y)) rotate(-1deg); }
+  50% { transform: translate(calc(var(--tile-x) + 1px), calc(var(--tile-y) - 2px)) rotate(2deg); }
+}
+@keyframes spaceFloat {
+  0%, 100% { transform: translate(var(--tile-x), var(--tile-y)) scale(1); filter: drop-shadow(0 0 8px rgba(156,39,176,0.3)); }
+  50% { transform: translate(calc(var(--tile-x) + 1px), calc(var(--tile-y) - 4px)) scale(1.08); filter: drop-shadow(0 0 14px rgba(156,39,176,0.6)); }
+}
+
+body.theme-ocean .tile { animation: oceanFloat 3s ease-in-out infinite; }
+body.theme-forest .tile { animation: forestRustle 2.5s ease-in-out infinite; }
+body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
+
 </style>
 </head>
 <body>
@@ -1266,6 +1285,72 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   
   window.milk2048 = { resetState, render, addMoney, applyTheme };
 })();
+
+/* ==== SOUND SYSTEM BY THEME ==== */
+const themeSounds = {
+  ocean: {
+    bg: new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_ebd01d6a64.mp3?filename=ocean-waves-ambient.mp3'),
+    move: new Audio('https://cdn.pixabay.com/download/audio/2022/03/16/audio_62a7a0dc09.mp3?filename=wave-hit.mp3')
+  },
+  forest: {
+    bg: new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_07e1d48d10.mp3?filename=forest-birds.mp3'),
+    move: new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_1794a4f178.mp3?filename=leaf-rustle.mp3')
+  },
+  space: {
+    bg: new Audio('https://cdn.pixabay.com/download/audio/2022/02/16/audio_8e1f16e7a3.mp3?filename=deep-space-hum.mp3'),
+    move: new Audio('https://cdn.pixabay.com/download/audio/2022/02/14/audio_7a5977c620.mp3?filename=laser-swish.mp3')
+  }
+};
+
+for (const t of Object.values(themeSounds)) {
+  t.bg.loop = true;
+  t.bg.volume = 0.35;
+  t.move.volume = 0.5;
+}
+
+function playThemeSound(theme) {
+  Object.values(themeSounds).forEach(s => s.bg.pause());
+  if (themeSounds[theme]) {
+    themeSounds[theme].bg.currentTime = 0;
+    themeSounds[theme].bg.play().catch(()=>{});
+  }
+}
+
+function playMoveSound() {
+  if (currentTheme !== 'default' && themeSounds[currentTheme]) {
+    themeSounds[currentTheme].move.currentTime = 0;
+    themeSounds[currentTheme].move.play().catch(()=>{});
+  }
+}
+
+const origDoMove = doMove;
+doMove = function(dir){
+  const moved = origDoMove(dir);
+  if (moved) playMoveSound();
+  return moved;
+}
+
+const origApplyTheme = applyTheme;
+applyTheme = function(theme){
+  origApplyTheme(theme);
+  playThemeSound(theme);
+};
+
+
+// === ENABLE SOUND ON FIRST CLICK ===
+document.addEventListener('click', enableAudioOnce, { once: true });
+document.addEventListener('touchstart', enableAudioOnce, { once: true });
+function enableAudioOnce() {
+  if (currentTheme !== 'default') {
+    playThemeSound(currentTheme);
+  }
+  Object.values(themeSounds).forEach(s => {
+    s.bg.muted = false;
+    s.move.muted = false;
+  });
+  console.log('🔊 Audio unlocked by user gesture');
+}
+
 </script>
 </body>
 </html>
