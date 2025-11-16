@@ -60,6 +60,14 @@ body{
 body.theme-ocean {
   background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 50%, #4fc3f7 100%);
 }
+body.theme-ocean .board-shell::after{
+  content: '';
+  position:absolute; inset:0; pointer-events:none; z-index:1;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800"><g fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><path d="M100 200c40 20 60 40 80 60s20 40 0 60-60 20-80 0-40-40 0-60z"/><path d="M400 500c30 15 45 30 60 45 15 15 15 30 0 45s-45 15-60 0-30-30 0-45z"/></g></svg>') repeat; 
+  animation: oceanFish 18s linear infinite;
+  opacity: 0.5;
+}
+@keyframes oceanFish{ from{ background-position: 0 0; } to{ background-position: 800px 0; } }
 
 /* Forest Theme Body */
 body.theme-forest {
@@ -108,20 +116,15 @@ body.theme-space .app {
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
-  text-shadow:
-    0 6px 0 rgba(14,59,72,0.8),
-    0 12px 0 rgba(14,59,72,0.6),
-    0 18px 0 rgba(14,59,72,0.4),
-    0 24px 0 rgba(14,59,72,0.2),
-    0 30px 15px rgba(0,0,0,0.3),
-    0 0 30px var(--title-glow);
+  filter: drop-shadow(0 8px 16px rgba(14,59,72,0.25));
   transform:perspective(400px) rotateX(12deg) rotateY(-2deg);
   letter-spacing:4px;
   margin:0;
   position:relative;
-  filter:drop-shadow(0 8px 16px rgba(14,59,72,0.3));
   transition: all 0.5s ease;
 }
+/* restore classic title look: remove outline background */
+.title::after{ content:none; }
 
 /* Ocean Theme Title */
 body.theme-ocean .title {
@@ -181,7 +184,7 @@ body.theme-space .title::before {
   0%,100%{opacity:0.3;transform:scale(1.02)}
   50%{opacity:0.8;transform:scale(1.05)}
 }
-.subtitle{font-size:13px;color:#45636c;margin-top:8px;font-weight:600;transition: color 0.5s ease;}
+.subtitle{font-size:13px;color:#45636c;margin-top:8px;font-weight:800;transition: color 0.5s ease; text-shadow: 0 1px 0 rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.08);}
 
 /* Ocean Theme Subtitle */
 body.theme-ocean .subtitle {
@@ -253,6 +256,7 @@ body.theme-space .btn {
   border:none;
 }
 
+.board-wrap{ display:flex; align-items:flex-start; gap:12px; position:relative; }
 .board-shell{
   background: var(--board-bg);
   padding:14px;
@@ -273,7 +277,7 @@ body.theme-space .board-shell {
   box-shadow: inset 0 6px 14px rgba(156,39,176,0.3), 0 12px 30px rgba(74,20,140,0.2);
 }
 
-.board{width:460px;height:460px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:16px;padding:14px;border-radius:12px;position:relative;overflow:visible}
+.board{width:460px;height:460px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:16px;padding:14px;border-radius:12px;position:relative;overflow:hidden;max-width:100%;max-height:100%;touch-action:none}
 .cell{
   background: var(--cell-bg);
   border-radius:12px;
@@ -300,24 +304,24 @@ body.theme-space .cell {
   font-weight:900;
   color:#12343d;
   box-shadow: 0 12px 30px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.4); 
-  transition: transform 500ms cubic-bezier(.22,.9,.12,1), width 200ms, height 200ms, background 0.5s ease; 
+  transition: transform 900ms cubic-bezier(.22,.9,.12,1), width 350ms, height 200ms, background 0.5s ease; 
   user-select:none; 
   will-change:transform; 
   font-size:20px; 
 }
 
 /* Ocean Theme Tiles */
-body.theme-ocean .tile.v2{background:linear-gradient(180deg,#e0f2f1,#b2dfdb);color:#004d40}
-body.theme-ocean .tile.v4{background:linear-gradient(180deg,#b2dfdb,#80cbc4);color:#004d40}
-body.theme-ocean .tile.v8{background:linear-gradient(180deg,#80cbc4,#4db6ac);color:#fff}
-body.theme-ocean .tile.v16{background:linear-gradient(180deg,#4db6ac,#26a69a);color:#fff}
-body.theme-ocean .tile.v32{background:linear-gradient(180deg,#26a69a,#009688);color:#fff}
-body.theme-ocean .tile.v64{background:linear-gradient(180deg,#009688,#00796b);color:#fff}
-body.theme-ocean .tile.v128{background:linear-gradient(180deg,#00796b,#00695c);color:#fff;font-size:18px}
-body.theme-ocean .tile.v256{background:linear-gradient(180deg,#00695c,#004d40);color:#fff;font-size:18px}
-body.theme-ocean .tile.v512{background:linear-gradient(180deg,#004d40,#00251a);color:#fff;font-size:18px}
-body.theme-ocean .tile.v1024{background:linear-gradient(180deg,#006064,#004d40);color:#fff;font-size:18px}
-body.theme-ocean .tile.v2048{background:linear-gradient(180deg,#00bcd4,#0097a7);color:#fff;font-size:18px;box-shadow:0 12px 34px rgba(0,188,212,0.4)}
+body.theme-ocean .tile.v2{background:linear-gradient(180deg,#e0f7ff,#b3e5fc);color:#01579b}
+body.theme-ocean .tile.v4{background:linear-gradient(180deg,#b3e5fc,#81d4fa);color:#01579b}
+body.theme-ocean .tile.v8{background:linear-gradient(180deg,#81d4fa,#4fc3f7);color:#fff}
+body.theme-ocean .tile.v16{background:linear-gradient(180deg,#4fc3f7,#29b6f6);color:#fff}
+body.theme-ocean .tile.v32{background:linear-gradient(180deg,#29b6f6,#039be5);color:#fff}
+body.theme-ocean .tile.v64{background:linear-gradient(180deg,#039be5,#0288d1);color:#fff}
+body.theme-ocean .tile.v128{background:linear-gradient(180deg,#0288d1,#0277bd);color:#fff;font-size:18px}
+body.theme-ocean .tile.v256{background:linear-gradient(180deg,#0277bd,#01579b);color:#fff;font-size:18px}
+body.theme-ocean .tile.v512{background:linear-gradient(180deg,#01579b,#003c6c);color:#fff;font-size:18px}
+body.theme-ocean .tile.v1024{background:linear-gradient(180deg,#006db3,#004b8d);color:#fff;font-size:18px}
+body.theme-ocean .tile.v2048{background:linear-gradient(180deg,#0288d1,#006db3);color:#fff;font-size:18px;box-shadow:0 12px 34px rgba(2,136,209,0.35)}
 
 /* Forest Theme Tiles */
 body.theme-forest .tile.v2{background:linear-gradient(180deg,#e8f5e8,#c8e6c9);color:#1b5e20}
@@ -409,24 +413,27 @@ body.theme-space .tile.v2048{background:linear-gradient(180deg,#9c27b0,#6a1b9a);
 #bottom-nav .nav-btn{flex:1;border:none;background:none;padding:10px;border-radius:10px;font-weight:700;color:#666;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
 #bottom-nav .nav-btn span{font-size:22px}
 #bottom-nav .nav-btn.active{color:#1e90ff;text-shadow:0 0 10px rgba(30,144,255,0.4)}
+.btn-danger{ background: linear-gradient(135deg,#f44336,#d32f2f); color:#fff; border:none; }
+.btn-danger:hover{ filter: brightness(1.05); }
 #shop-panel{left:50%;transform:translate(-50%,0);bottom:92px;top:auto;position:fixed;width:min(400px,90vw);max-height:70vh;overflow:hidden;display:none;background:linear-gradient(145deg,#1a1a2e 0%,#16213e 50%,#0f1419 100%);color:#fff;border:2px solid #4a5568;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 30px rgba(59,130,246,0.3)}
 #shop-items{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px;overflow-y:auto;max-height:50vh}
 #chaos-tips{
-  position:absolute;
+  position:sticky;
   top:10px;
-  right:10px;
-  width:200px;
+  align-self:flex-start;
+  width:220px;
   background:#fff;
   padding:10px;
   border-radius:10px;
   box-shadow:0 8px 24px rgba(0,0,0,0.15);
   display:none;
-  z-index:100;
+  z-index:10;
   font-size:12px;
   border:2px solid #2d3748;
-  transform:translateY(0);
-  transition: all 0.5s ease;
+  transform:none;
+  transition: all 0.3s ease;
 }
+.chaos-aside{ margin-top:6px; }
 
 /* Ocean Theme Chaos Tips */
 body.theme-ocean #chaos-tips {
@@ -443,7 +450,6 @@ body.theme-space #chaos-tips {
 }
 
 @media(max-width:520px){ 
-  .board{width:92vw;height:92vw;gap:10px;padding:12px} 
   .app{padding:12px} 
   #bottom-nav{left:8px;right:8px;height:72px} 
   .tutorial-content{padding:20px;max-width:95vw;max-height:85vh} 
@@ -465,6 +471,8 @@ body.theme-space #chaos-tips {
   } 
   #shop-panel{width:95vw;max-height:80vh} 
   #shop-items{grid-template-columns:1fr;gap:8px;max-height:60vh} 
+  /* Chaos tips go below the board on small screens */
+  .board-wrap{ flex-direction:column; }
   #chaos-tips{
     position:relative;
     width:100%;
@@ -472,6 +480,7 @@ body.theme-space #chaos-tips {
     right:auto;
     top:auto;
     transform:none;
+    z-index:1;
   }
   #results-list{
     max-height:250px;
@@ -479,6 +488,9 @@ body.theme-space #chaos-tips {
     -webkit-overflow-scrolling:touch;
     overscroll-behavior:contain;
   }
+  /* Board scales to viewport safely */
+  .board{width:100%;height:100vw;max-height:92vw;max-width:92vw;gap:10px;padding:12px;overflow:hidden}
+  .board-shell{padding:10px}
 }
 .hidden{display:none}
 
@@ -499,6 +511,69 @@ body.theme-space #chaos-tips {
 body.theme-ocean .tile { animation: oceanFloat 3s ease-in-out infinite; }
 body.theme-forest .tile { animation: forestRustle 2.5s ease-in-out infinite; }
 body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
+
+/* Disable subtle floating animations on small screens to avoid overflow jitter */
+@media (max-width:520px){
+  body.theme-ocean .tile,
+  body.theme-forest .tile,
+  body.theme-space .tile { animation: none; }
+}
+
+
+/* === Additional mobile tweaks === */
+@media (max-width:400px){
+  .title{ font-size:24px; }
+  .score-pill{ font-size:11px; padding:6px 8px; }
+  .mode-btn, .btn{ font-size:12px; padding:6px 10px; }
+  .board{ gap:8px; padding:10px; max-width:94vw; max-height:94vw; }
+  #bottom-nav{height:68px;}
+}
+
+.btn-danger{ background: linear-gradient(135deg,#f44336,#d32f2f); color:#fff; border:none; }
+.btn-danger:hover{ filter: brightness(1.05); }
+
+/* Bubble Gum Theme Variables */
+body.theme-bubblegum {
+  --accent: #ff79b0;
+  --panel: #fff0f6;
+  --text: #6b0f3b;
+  --board-bg: linear-gradient(180deg,#ffe0ef,#ffd1e8);
+  --cell-bg: linear-gradient(180deg,#ffeaf3,#ffd6ea);
+  --title-gradient: linear-gradient(45deg,#ff93c9 0%,#ff79b0 25%,#ff5fa1 50%,#ff8ac6 75%,#ffc1e3 100%);
+  --title-glow: rgba(255,121,176,0.6);
+}
+body.theme-bubblegum .app { background: rgba(255,240,246,0.95); border-color:#ff79b0; box-shadow: 0 18px 50px rgba(255,121,176,0.2), 0 0 30px rgba(255,138,198,0.35); }
+body.theme-bubblegum .subtitle{ color:#a83b73; }
+body.theme-bubblegum .cell{ box-shadow: inset 0 4px 10px rgba(255,121,176,0.2), 0 6px 12px rgba(255,138,198,0.15); }
+body.theme-bubblegum .tile.v2{ background: linear-gradient(180deg,#ffd6ea,#ffc1e3); color:#6b0f3b }
+body.theme-bubblegum .tile.v4{ background: linear-gradient(180deg,#ffc1e3,#ffaddb); color:#6b0f3b }
+body.theme-bubblegum .tile.v8{ background: linear-gradient(180deg,#ffaddb,#ff93c9); color:#fff }
+body.theme-bubblegum .tile.v16{ background: linear-gradient(180deg,#ff93c9,#ff79b0); color:#fff }
+body.theme-bubblegum .tile.v32{ background: linear-gradient(180deg,#ff79b0,#ff5fa1); color:#fff }
+body.theme-bubblegum .tile.v64{ background: linear-gradient(180deg,#ff5fa1,#ff4f95); color:#fff }
+body.theme-bubblegum .tile.v128{ background: linear-gradient(180deg,#ff4f95,#e83e86); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v256{ background: linear-gradient(180deg,#e83e86,#c72d73); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v512{ background: linear-gradient(180deg,#c72d73,#a61c60); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v1024{ background: linear-gradient(180deg,#a61c60,#8a124f); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v2048{ background: linear-gradient(180deg,#ff79b0,#ff4f95); color:#fff; font-size:18px; box-shadow:0 12px 34px rgba(255,121,176,0.4) }
+
+/* Chupa Chups overlay */
+/* Replace simple candy icon with full-height image overlay inside wrapper */
+body.theme-bubblegum .board-shell::before,
+body.theme-bubblegum .board-shell::after{ content:none; }
+
+.board-shell .candy-wrap{ position:absolute; inset:10px; pointer-events:none; z-index:1; display:flex; align-items:flex-end; justify-content:flex-end; }
+.board-shell .candy{
+  position:relative; height:100%; aspect-ratio: 9/16; object-fit:contain; filter: saturate(1.05) contrast(1.05) drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+  image-rendering:auto;
+}
+.board-shell .candy--right{ align-self:flex-end; max-width:40%; }
+.board-shell .candy--left{ align-self:flex-start; max-width:30%; transform: rotate(-8deg); }
+
+@media(max-width:520px){
+  .board-shell .candy--right{ max-width:48%; }
+  .board-shell .candy--left{ max-width:36%; }
+}
 
 </style>
 </head>
@@ -549,8 +624,7 @@ body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
       <div class="score-pill">Счёт: <span id="score">0</span></div>
       <div class="score-pill">Лучший: <span id="best-score">0</span></div>
       <div class="score-pill">Ходы: <span id="moves">0</span></div>
-      <div class="score-pill">Время: <span id="time">00:00</span></div>
-    </div>
+          </div>
   </div>
   <div class="controls" role="toolbar">
     <button id="mode-classic" class="mode-btn active">Классика</button>
@@ -560,17 +634,21 @@ body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
   <div class="board-wrap">
     <div class="board-shell">
       <div id="game-board" class="board" aria-label="Игровое поле" tabindex="0"></div>
-      <div id="chaos-tips" aria-hidden="true">
-        <h4 style="margin:0 0 8px 0;color:#2d3748;font-size:14px;font-weight:700;">🔮 Подсказки Хаоса</h4>
-        <ul style="margin:0;padding-left:16px;font-size:11px;line-height:1.4;">
-          <li>💣 <b>Бомба</b> — уничтожает соседние плитки</li>
-          <li>× <b>Множитель</b> — увеличивает соседний куб</li>
-          <li>❄ <b>Заморозка</b> — блокирует кубы на 3 хода</li>
-          <li>★ <b>Джокер</b> — объединяется с любым кубом</li>
-          <li>🔀 <b>Шафл</b> — перемешивает кубы</li>
-        </ul>
+      <div class="candy-wrap">
+        <img class="candy candy--right" id="bubblegum-candy-1" alt="candy" />
+        <img class="candy candy--left" id="bubblegum-candy-2" alt="candy" />
       </div>
     </div>
+    <aside id="chaos-tips" aria-hidden="true" class="chaos-aside">
+      <h4 style="margin:0 0 8px 0;color:#2d3748;font-size:14px;font-weight:700;">🔮 Подсказки Хаоса</h4>
+      <ul style="margin:0;padding-left:16px;font-size:11px;line-height:1.4;">
+        <li>💣 <b>Бомба</b> — уничтожает соседние плитки</li>
+        <li>× <b>Множитель</b> — увеличивает соседний куб</li>
+        <li>❄ <b>Заморозка</b> — блокирует кубы на 3 хода</li>
+        <li>★ <b>Джокер</b> — объединяется с любым кубом</li>
+        <li>🔀 <b>Шафл</b> — перемешивает кубы</li>
+      </ul>
+    </aside>
     <div style="margin-top:10px;font-size:13px;color:#45636c">Используй стрелки или свайпы. 
   </div>
 </div>
@@ -578,7 +656,7 @@ body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
   <h3>История игр</h3>
   <ul id="results-list"></ul>
   <div style="text-align:right;margin-top:10px">
-    <button id="close-results" class="btn">✖ Закрыть</button>
+    <button id="close-results" class="btn btn-danger">✖ Закрыть</button>
   </div>
 </div>
 <div id="shop-panel" aria-hidden="true">
@@ -629,6 +707,7 @@ body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
   <button class="nav-btn active" data-target="game-app"><span>🎮</span><div>Игра</div></button>
   <button class="nav-btn" data-target="shop-panel"><span>🛍️</span><div>Магазин</div></button>
   <button class="nav-btn" data-target="results-panel"><span>📊</span><div>Результаты</div></button>
+  <button class="nav-btn" data-target="achievements-panel"><span>🏅</span><div>Достижения</div></button>
 </div>
 <script>
 const MERGE_SOUND_URL = 'https://actions.google.com/sounds/v1/water/bubble.ogg';
@@ -639,7 +718,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('best-score');
   const movesEl = document.getElementById('moves');
-  const timeEl = document.getElementById('time');
+  const timeEl = null;
   const resultsList = document.getElementById('results-list');
   const shopItems = document.getElementById('shop-items');
   const chaosTips = document.getElementById('chaos-tips');
@@ -656,19 +735,40 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
     document.body.className = theme === 'default' ? '' : `theme-${theme}`;
     currentTheme = theme;
     localStorage.setItem('milk2048_theme', theme);
+    // Увеличенные тач-таргеты на мобильных
+    try {
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
+      const buttons = document.querySelectorAll('.mode-btn, .btn, #bottom-nav .nav-btn');
+      buttons.forEach(b=>{
+        if(isMobile){ b.style.padding = '12px 16px'; b.style.minHeight = '44px'; b.style.fontSize = '14px'; }
+        else { b.style.padding = ''; b.style.minHeight = ''; b.style.fontSize = ''; }
+      });
+    } catch(e){}
   }
   
   function emptyGrid(){ return Array.from({length:SIZE}, ()=> Array(SIZE).fill(0)); }
   function resetState(){ grid = emptyGrid(); tiles = {}; nextId = 1; score = 0; moves = 0; seconds = 0; }
-  function startTimer(){ if(timer) clearInterval(timer); timer=setInterval(()=>{ seconds++; timeEl.textContent = formatTime(seconds); },1000); }
+  function startTimer(){ if(timer) clearInterval(timer); timer=setInterval(()=>{ seconds++; /* time hidden */ },1000); }
   function stopTimer(){ if(timer) clearInterval(timer); timer=null; }
   function formatTime(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
   function saveState(){ try{ localStorage.setItem('milk2048_state', JSON.stringify({grid,tiles,nextId,score,best,moves,seconds,mode})); localStorage.setItem('milk2048_best', String(best)); }catch(e){console.warn(e);} }
   function loadState(){ try{ const raw=localStorage.getItem('milk2048_state'); if(!raw) return false; const d=JSON.parse(raw); if(!d) return false; grid=d.grid||emptyGrid(); tiles=d.tiles||{}; nextId=d.nextId||1; score=d.score||0; best=d.best||best; moves=d.moves||0; seconds=d.seconds||0; mode=d.mode||'classic'; return true; }catch(e){return false;} }
   function createTile(value,r,c,specialType=null){ const id='t'+(nextId++); const t={id,value,r,c,specialType,frozen:false}; tiles[id]=t; grid[r][c]=id; return t; }
   function addRandom(){ const empties=[]; for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) empties.push({r,c}); if(!empties.length) return false; const pos = empties[Math.floor(Math.random()*empties.length)]; let v = Math.random()<0.9?2:4; if(mode==='chaos'){ const r=Math.random(); if(r<0.05){ const types=['bomb','multiplier','freeze','wildcard','shuffle']; const t=types[Math.floor(Math.random()*types.length)]; createTile(0,pos.r,pos.c,t); return true; } if(r<0.12) v = Math.random()<0.5?4:8; } createTile(v,pos.r,pos.c); return true; }
-  function computeSizes(){ const rect = boardEl.getBoundingClientRect(); const gap = parseFloat(getComputedStyle(boardEl).getPropertyValue('gap')||16); const padding = parseFloat(getComputedStyle(boardEl).getPropertyValue('padding')||14); const totalGap = gap*(SIZE-1); const cell = (Math.min(rect.width, rect.height)-padding*2-totalGap)/SIZE; return {cell,gap,padding}; }
-  function render(){ boardEl.innerHTML=''; for(let i=0;i<SIZE*SIZE;i++){ const cell = document.createElement('div'); cell.className='cell'; boardEl.appendChild(cell); } const sizes = computeSizes(); const cellSize = sizes.cell, gap=sizes.gap, padding=sizes.padding; Object.values(tiles).forEach(t=>{ if(!t) return; if(t.value<=0 && !t.specialType) return; let el = document.querySelector('[data-id="'+t.id+'"]'); const existed = !!el; if(!el){ el = document.createElement('div'); el.dataset.id = t.id; boardEl.appendChild(el); } if(t.specialType) el.className = 'tile chaos-'+t.specialType; else el.className = 'tile v'+t.value; if(t.value===1024) el.classList.add('v1024'); else el.classList.remove('v1024'); if(t.value>=2048) el.classList.add('v2048'); else el.classList.remove('v2048'); if(t.value>=4096) el.classList.add('legendary'); else el.classList.remove('legendary'); if(t.frozen) el.classList.add('frozen'); else el.classList.remove('frozen'); el.textContent = t.specialType? '': (t.value>0? t.value : ''); const x = padding + (cellSize+gap)*t.c; const y = padding + (cellSize+gap)*t.r; el.style.setProperty('--tile-x', x+'px'); el.style.setProperty('--tile-y', y+'px'); el.style.width = cellSize+'px'; el.style.height = cellSize+'px'; el.style.transform = 'translate('+x+'px,'+y+'px)'; if(!existed){ el.classList.add('new'); setTimeout(()=>el.classList.remove('new'), 420); } }); scoreEl.textContent = score; bestEl.textContent = best; movesEl.textContent = moves; timeEl.textContent = formatTime(seconds); }
+  function computeSizes(){
+    // Гибкая адаптация размеров: используем фактический клиентский размер и страхуемся на мобильных
+    const rect = boardEl.getBoundingClientRect();
+    const styles = getComputedStyle(boardEl);
+    const gap = parseFloat(styles.getPropertyValue('gap')||16);
+    const padding = parseFloat(styles.getPropertyValue('padding')||14);
+    const totalGap = gap*(SIZE-1);
+    // Берём минимальную сторону, но также ограничиваемся шириной вьюпорта
+    const vwSide = Math.min(window.innerWidth*0.92, rect.width);
+    const side = Math.max(0, Math.min(rect.width || vwSide, rect.height || vwSide, vwSide));
+    const cell = Math.max(0, (side - padding*2 - totalGap)/SIZE);
+    return {cell,gap,padding};
+  }
+  function render(){ boardEl.innerHTML=''; for(let i=0;i<SIZE*SIZE;i++){ const cell = document.createElement('div'); cell.className='cell'; boardEl.appendChild(cell); } const sizes = computeSizes(); const cellSize = sizes.cell, gap=sizes.gap, padding=sizes.padding; Object.values(tiles).forEach(t=>{ if(!t) return; if(t.value<=0 && !t.specialType) return; let el = document.querySelector('[data-id="'+t.id+'"]'); const existed = !!el; if(!el){ el = document.createElement('div'); el.dataset.id = t.id; boardEl.appendChild(el); } if(t.specialType) el.className = 'tile chaos-'+t.specialType; else el.className = 'tile v'+t.value; if(t.value===1024) el.classList.add('v1024'); else el.classList.remove('v1024'); if(t.value>=2048) el.classList.add('v2048'); else el.classList.remove('v2048'); if(t.value>=4096) el.classList.add('legendary'); else el.classList.remove('legendary'); if(t.frozen) el.classList.add('frozen'); else el.classList.remove('frozen'); el.textContent = t.specialType? '': (t.value>0? t.value : ''); const x = Math.round(padding + (cellSize+gap)*t.c); const y = Math.round(padding + (cellSize+gap)*t.r); el.style.setProperty('--tile-x', x+'px'); el.style.setProperty('--tile-y', y+'px'); el.style.width = Math.max(0, Math.floor(cellSize))+'px'; el.style.height = Math.max(0, Math.floor(cellSize))+'px'; el.style.transform = 'translate('+x+'px,'+y+'px)'; el.style.willChange = 'transform'; el.style.transitionTimingFunction = 'cubic-bezier(0.22, 1, 0.36, 1)'; el.style.transitionDuration = '720ms'; if(!existed){ el.classList.add('new'); setTimeout(()=>el.classList.remove('new'), 420); } }); scoreEl.textContent = score; bestEl.textContent = best; movesEl.textContent = moves; }
   function canMove(){ for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) return true; for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){ const id = grid[r][c]; if(!id) continue; const t = tiles[id]; if(!t || t.specialType) continue; const v = t.value; const dirs = [[1,0],[0,1]]; for(const d of dirs){ const rr=r+d[0], cc=c+d[1]; if(rr<0||rr>=SIZE||cc<0||cc>=SIZE) continue; const id2 = grid[rr][cc]; if(!id2) continue; const t2 = tiles[id2]; if(!t2 || t2.specialType) continue; if(t2.value===v) return true; } } return false; }
   
   // ИСПРАВЛЕННАЯ ФУНКЦИЯ ДВИЖЕНИЯ
@@ -718,51 +818,43 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
     return moved; 
   }
 
+  
   function moveUp(){
     let moved = false;
     for(let c=0;c<SIZE;c++){
-      const column = [];
+      const nonEmpty = [];
       for(let r=0;r<SIZE;r++){
         const id = grid[r][c];
-        column.push(id ? tiles[id] : null);
+        if(id) nonEmpty.push(tiles[id]);
       }
-      const compact = column.filter(x => x && (x.value > 0 || x.specialType));
-      const processed = [];
-      for(let i=0;i<compact.length;i++){
-        if(i+1<compact.length && !compact[i].specialType && !compact[i+1].specialType && compact[i].value>0 && compact[i].value===compact[i+1].value){
-          compact[i].value *= 2;
-          score += compact[i].value;
-          if(score>best){
-            best = score;
-            localStorage.setItem('milk2048_best', String(best));
-          }
-          delete tiles[compact[i+1].id];
-          try{
-            mergeSound.currentTime=0;
-            mergeSound.play();
-          }catch(e){}
-          processed.push(compact[i]);
+      const merged = [];
+      for(let i=0;i<nonEmpty.length;i++){
+        const a = nonEmpty[i];
+        const b = nonEmpty[i+1];
+        if(b && !a.specialType && !b.specialType && a.value === b.value){
+          a.value *= 2;
+          score += a.value;
+          if(score>best){ best = score; localStorage.setItem('milk2048_best', String(best)); }
+          delete tiles[b.id];
           i++;
-        } else {
-          processed.push(compact[i]);
         }
+        merged.push(a);
       }
-      while(processed.length<SIZE) processed.push(null);
+      while(merged.length < SIZE) merged.push(null);
       for(let r=0;r<SIZE;r++){
-        const item = processed[r];
+        const item = merged[r];
         const prev = grid[r][c];
         if(item){
           grid[r][c] = item.id;
           item.r = r;
           item.c = c;
-        } else {
-          grid[r][c] = 0;
-        }
+        } else grid[r][c] = 0;
         if(prev !== grid[r][c]) moved = true;
       }
     }
     return moved;
   }
+
 
   function moveRight(){
     let moved = false;
@@ -811,52 +903,44 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
     return moved;
   }
 
+  
   function moveDown(){
     let moved = false;
     for(let c=0;c<SIZE;c++){
-      const column = [];
+      const nonEmpty = [];
       for(let r=SIZE-1;r>=0;r--){
         const id = grid[r][c];
-        column.push(id ? tiles[id] : null);
+        if(id) nonEmpty.push(tiles[id]);
       }
-      const compact = column.filter(x => x && (x.value > 0 || x.specialType));
-      const processed = [];
-      for(let i=0;i<compact.length;i++){
-        if(i+1<compact.length && !compact[i].specialType && !compact[i+1].specialType && compact[i].value>0 && compact[i].value===compact[i+1].value){
-          compact[i].value *= 2;
-          score += compact[i].value;
-          if(score>best){
-            best = score;
-            localStorage.setItem('milk2048_best', String(best));
-          }
-          delete tiles[compact[i+1].id];
-          try{
-            mergeSound.currentTime=0;
-            mergeSound.play();
-          }catch(e){}
-          processed.push(compact[i]);
+      const merged = [];
+      for(let i=0;i<nonEmpty.length;i++){
+        const a = nonEmpty[i];
+        const b = nonEmpty[i+1];
+        if(b && !a.specialType && !b.specialType && a.value === b.value){
+          a.value *= 2;
+          score += a.value;
+          if(score>best){ best = score; localStorage.setItem('milk2048_best', String(best)); }
+          delete tiles[b.id];
           i++;
-        } else {
-          processed.push(compact[i]);
         }
+        merged.push(a);
       }
-      while(processed.length<SIZE) processed.push(null);
+      while(merged.length < SIZE) merged.push(null);
       for(let r=0;r<SIZE;r++){
-        const item = processed[r];
-        const actualRow = SIZE-1-r;
-        const prev = grid[actualRow][c];
+        const item = merged[r];
+        const targetR = SIZE-1-r;
+        const prev = grid[targetR][c];
         if(item){
-          grid[actualRow][c] = item.id;
-          item.r = actualRow;
+          grid[targetR][c] = item.id;
+          item.r = targetR;
           item.c = c;
-        } else {
-          grid[actualRow][c] = 0;
-        }
-        if(prev !== grid[actualRow][c]) moved = true;
+        } else grid[targetR][c] = 0;
+        if(prev !== grid[targetR][c]) moved = true;
       }
     }
     return moved;
   }
+
 
   function doMove(dir){ 
     let moved = false; 
@@ -1028,7 +1112,20 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   document.getElementById('continue-btn')?.addEventListener('click', ()=>{ document.getElementById('modal-win').style.display='none'; });
   document.getElementById('restart-btn')?.addEventListener('click', ()=>{ document.getElementById('modal-over').style.display='none'; resetState(); addRandom(); addRandom(); render(); saveState(); startTimer(); });
   document.getElementById('close-over')?.addEventListener('click', ()=>{ document.getElementById('modal-over').style.display='none'; });
-  document.querySelectorAll('#bottom-nav .nav-btn').forEach(btn=>{ btn.addEventListener('click', ()=>{ playSwishSound(); document.querySelectorAll('#bottom-nav .nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('shop-panel').style.display='none'; document.getElementById('results-panel').style.display='none'; const target = btn.getAttribute('data-target'); if(target==='game-app'){ document.getElementById('game-app').style.display='block'; } else { document.getElementById('game-app').style.display='block'; document.getElementById(target).style.display='block'; } }); });
+  document.querySelectorAll('#bottom-nav .nav-btn').forEach(btn=>{
+    const handler = ()=>{ 
+      playSwishSound(); 
+      document.querySelectorAll('#bottom-nav .nav-btn').forEach(b=>b.classList.remove('active')); 
+      btn.classList.add('active'); 
+      document.getElementById('shop-panel').style.display='none'; 
+      document.getElementById('results-panel').style.display='none'; 
+      const target = btn.getAttribute('data-target'); 
+      if(target==='game-app'){ document.getElementById('game-app').style.display='block'; } 
+      else { document.getElementById('game-app').style.display='block'; document.getElementById(target).style.display='block'; } 
+    };
+    btn.addEventListener('click', handler, {passive:true});
+    btn.addEventListener('touchstart', (e)=>{ e.preventDefault(); handler(); }, {passive:false});
+  });
   
   function populateShop(){ 
     shopItems.innerHTML=''; 
@@ -1038,7 +1135,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
       {key:'coral',title:'Кораллы',rarity:'epic',icon:'🪸',preview:'linear-gradient(135deg,#ffe6d6 0%,#ffd6c5 70%)'},
       {key:'forest',title:'Лес',rarity:'rare',icon:'🌲',preview:'linear-gradient(135deg,#c8e6c9 0%,#81c784 70%)'},
       {key:'space',title:'Космос',rarity:'legendary',icon:'🌌',preview:'linear-gradient(135deg,#1a1a2e 0%,#0f1419 70%)'},
-      {key:'meadow',title:'Луговой',rarity:'epic',icon:'🌼',preview:'linear-gradient(135deg,#fff8dc 0%,#f0e68c 70%)'}
+      {key:'bubblegum',title:'Bubble Gum',rarity:'epic',icon:'🍭',preview:'linear-gradient(135deg,#ffd1e8 0%,#ff8ac6 70%)'}
     ]; 
     
     choices.forEach((it, index)=>{
@@ -1282,11 +1379,80 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   
   // Apply saved theme
   applyTheme(currentTheme);
+
+  // Runtime chroma-key for supplied green-screen candy image
+  (function(){
+    const GREEN_SRC = 'data:image/jpeg;base64,'; // placeholder, will set below
+    const b64 = `{{B64_CANDY}}`;
+    const src = b64 && b64.length>100 ? 'data:image/jpeg;base64,'+b64 : GREEN_SRC;
+
+    function chromaKeyImage(src, opts){
+      return new Promise((resolve)=>{
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = ()=>{
+          const w = img.naturalWidth, h = img.naturalHeight;
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img,0,0);
+          const imgData = ctx.getImageData(0,0,w,h);
+          const d = imgData.data;
+          const {
+            key = {r:0,g:255,b:0},
+            tol = 80,
+            soft = 30
+          } = opts||{};
+          const kr=key.r, kg=key.g, kb=key.b;
+          for(let i=0;i<d.length;i+=4){
+            const r=d[i], g=d[i+1], b=d[i+2];
+            const dist = Math.sqrt((r-kr)*(r-kr)+(g-kg)*(g-kg)+(b-kb)*(b-kb));
+            let alpha = 255;
+            if(dist < tol){
+              alpha = 0;
+            } else if(dist < tol+soft){
+              const t = (dist - tol)/soft; // 0..1
+              alpha = Math.round(255*t);
+            }
+            d[i+3] = alpha;
+          }
+          ctx.putImageData(imgData,0,0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = ()=>resolve(src);
+        img.src = src;
+      });
+    }
+
+    async function ensureCandies(){
+      const c1 = document.getElementById('bubblegum-candy-1');
+      const c2 = document.getElementById('bubblegum-candy-2');
+      if(!c1 || !c2) return;
+      const keyed = await chromaKeyImage(src, { tol: 85, soft: 45 });
+      c1.src = keyed; c2.src = keyed;
+    }
+
+    // run on load and when theme changes to bubblegum
+    ensureCandies();
+    const origApply = window.milk2048?.applyTheme;
+    if(typeof origApply === 'function' && !window.__bubblegumPatched){
+      window.__bubblegumPatched = true;
+      window.milk2048.applyTheme = function(theme){
+        const r = origApply(theme);
+        if(theme==='bubblegum') ensureCandies();
+        return r;
+      };
+    }
+  })();
   
-  window.milk2048 = { resetState, render, addMoney, applyTheme };
-})();
+  // Export essential APIs to window so external systems (audio) can patch safely
+  window.milk2048 = { resetState, render, addMoney, applyTheme, doMove };
+i})();
 
 /* ==== SOUND SYSTEM BY THEME ==== */
+// Удаляем возможные предыдущие обработчики, чтобы не дублировать звуки при повторной загрузке
+window.__milk2048_themeAudio?.cleanup?.();
+
 const themeSounds = {
   ocean: {
     bg: new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_ebd01d6a64.mp3?filename=ocean-waves-ambient.mp3'),
@@ -1304,8 +1470,8 @@ const themeSounds = {
 
 for (const t of Object.values(themeSounds)) {
   t.bg.loop = true;
-  t.bg.volume = 0.35;
-  t.move.volume = 0.5;
+  t.bg.volume = 0.25; // чуть тише, чтобы не мешать
+  t.move.volume = 0.55;
 }
 
 function playThemeSound(theme) {
@@ -1317,40 +1483,210 @@ function playThemeSound(theme) {
 }
 
 function playMoveSound() {
-  if (currentTheme !== 'default' && themeSounds[currentTheme]) {
-    themeSounds[currentTheme].move.currentTime = 0;
-    themeSounds[currentTheme].move.play().catch(()=>{});
-  }
+  try {
+    const theme = (localStorage.getItem('milk2048_theme') || 'default');
+    if (theme !== 'default' && themeSounds[theme]) {
+      themeSounds[theme].move.currentTime = 0;
+      themeSounds[theme].move.play().catch(()=>{});
+    }
+  } catch(e) {}
 }
 
-const origDoMove = doMove;
-doMove = function(dir){
-  const moved = origDoMove(dir);
-  if (moved) playMoveSound();
-  return moved;
+// Безопасно патчим doMove один раз
+if(!window.__milk2048_themeAudio){ window.__milk2048_themeAudio = {}; }
+if(!window.__milk2048_themeAudio.patchedMove && window.milk2048 && typeof window.milk2048.doMove === 'function'){
+  const origDoMove = window.milk2048.doMove;
+  window.milk2048.doMove = function(dir){
+    const moved = origDoMove(dir);
+    if (moved) playMoveSound();
+    return moved;
+  };
+  window.__milk2048_themeAudio.patchedMove = true;
 }
 
-const origApplyTheme = applyTheme;
-applyTheme = function(theme){
-  origApplyTheme(theme);
-  playThemeSound(theme);
+// Безопасно патчим applyTheme один раз
+if(!window.__milk2048_themeAudio.patchedTheme && window.milk2048 && typeof window.milk2048.applyTheme === 'function'){
+  const origApplyTheme = window.milk2048.applyTheme;
+  window.milk2048.applyTheme = function(theme){
+    origApplyTheme(theme);
+    playThemeSound(theme);
+  };
+  window.__milk2048_themeAudio.patchedTheme = true;
+}
+
+// Метод очистки (на случай HMR/перегрузки)
+window.__milk2048_themeAudio.cleanup = function(){
+  try { Object.values(themeSounds).forEach(s=>{ s.bg.pause(); s.bg.src=''; s.move.src=''; }); } catch(e){}
+  window.__milk2048_themeAudio = undefined;
 };
 
 
 // === ENABLE SOUND ON FIRST CLICK ===
-document.addEventListener('click', enableAudioOnce, { once: true });
-document.addEventListener('touchstart', enableAudioOnce, { once: true });
+let __audioUnlocked = false;
 function enableAudioOnce() {
-  if (currentTheme !== 'default') {
-    playThemeSound(currentTheme);
-  }
-  Object.values(themeSounds).forEach(s => {
-    s.bg.muted = false;
-    s.move.muted = false;
-  });
+  if(__audioUnlocked) return;
+  __audioUnlocked = true;
+  try {
+    const theme = (localStorage.getItem('milk2048_theme') || 'default');
+    if (theme !== 'default') {
+      playThemeSound(theme);
+    }
+    Object.values(themeSounds).forEach(s => {
+      s.bg.muted = false;
+      s.move.muted = false;
+      // Prime audio to satisfy autoplay policies
+      try { s.bg.play().then(()=>{ s.bg.pause(); s.bg.currentTime = 0; }).catch(()=>{}); } catch(e){}
+      try { s.move.play().then(()=>{ s.move.pause(); s.move.currentTime = 0; }).catch(()=>{}); } catch(e){}
+    });
+  } catch(e) {}
   console.log('🔊 Audio unlocked by user gesture');
 }
+document.addEventListener('click', enableAudioOnce, { once: true });
+document.addEventListener('touchstart', enableAudioOnce, { once: true });
 
+
+// === ADDED: Audio & play-on-first-action initialization ===
+// Убираем дубль альтернативной системы аудио — оставляем единую реализацию выше
+/* (disabled duplicate)
+(function(){
+  // URLs (royalty-free samples)
+  const bgUrls = {
+    ocean: 'https://cdn.pixabay.com/download/audio/2021/09/14/audio_45b8c459a7.mp3?filename=ocean-waves-ambient.mp3',
+    forest: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_4e8ef8b3c1.mp3?filename=forest-nature-sounds.mp3',
+    space: 'https://cdn.pixabay.com/download/audio/2023/02/23/audio_9a0b1e2b35.mp3?filename=ambient-space-pad.mp3'
+  };
+  const moveUrls = {
+    ocean: 'https://cdn.pixabay.com/download/audio/2021/09/14/audio_252c66ab7b.mp3?filename=small-wave.mp3',
+    forest: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_efbc1b67f2.mp3?filename=rustling-leaves.mp3',
+    space: 'https://cdn.pixabay.com/download/audio/2023/02/15/audio_3d1297d3f9.mp3?filename=whoosh-space.mp3'
+  };
+
+  const bgSounds = {};
+  const moveSounds = {};
+  let audioInitialized = false;
+  // Create Audio objects but do not play yet
+  function createAudioObjects(){
+    for(const k of Object.keys(bgUrls)){
+      const a = new Audio(bgUrls[k]);
+      a.loop = true;
+      a.volume = 0.35;
+      bgSounds[k] = a;
+    }
+    for(const k of Object.keys(moveUrls)){
+      const a = new Audio(moveUrls[k]);
+      a.volume = 0.55;
+      moveSounds[k] = a;
+    }
+  }
+
+  // Play background corresponding to current theme
+  function playBackgroundForTheme(theme){
+    // pause all
+    Object.values(bgSounds).forEach(x=>{ try{x.pause(); x.currentTime = 0;}catch(e){} });
+    if(theme === 'default') return;
+    const key = theme;
+    const a = bgSounds[key];
+    if(a){
+      a.currentTime = 0;
+      a.play().catch(()=>{});
+    }
+  }
+  // Play move sound
+  function playMoveSoundForTheme(theme){
+    const key = theme;
+    const a = moveSounds[key];
+    if(a){
+      try{ a.currentTime = 0; a.play().catch(()=>{}); }catch(e){}
+    }
+  }
+
+  // Expose small API on window for use in existing code
+  window.__milk2048_audio = {
+    initOnce: function(){
+      if(audioInitialized) return;
+      createAudioObjects();
+      audioInitialized = true;
+      // start background for current theme (read from localStorage or default)
+      const stored = localStorage.getItem('milk2048_theme') || 'default';
+      const theme = stored === 'default' ? 'default' : stored;
+      playBackgroundForTheme(theme);
+    },
+    playBackgroundFor: playBackgroundForTheme,
+    playMoveFor: playMoveSoundForTheme
+  };
+
+  // Start audio on first user action: click/tap/keydown or tutorial-start button
+  function userGestureHandler(){
+    try{ window.__milk2048_audio.initOnce(); }catch(e){}
+    // remove listeners after first interaction
+    document.removeEventListener('click', userGestureHandler, true);
+    document.removeEventListener('touchstart', userGestureHandler, true);
+    document.removeEventListener('keydown', userGestureHandler, true);
+  }
+  document.addEventListener('click', userGestureHandler, true);
+  document.addEventListener('touchstart', userGestureHandler, true);
+  document.addEventListener('keydown', userGestureHandler, true);
+
+  // Hook into theme changes if applyTheme exists
+  const origApply = window.applyTheme;
+  if(typeof origApply === 'function'){
+    window.applyTheme = function(theme){
+      origApply(theme);
+      try{ window.__milk2048_audio.playBackgroundFor(theme === 'default' ? 'default' : theme); }catch(e){}
+    };
+  } else {
+    // if applyTheme not yet defined, poll for it
+    const iv = setInterval(()=>{
+      if(typeof window.applyTheme === 'function'){
+        clearInterval(iv);
+        const real = window.applyTheme;
+        window.applyTheme = function(theme){
+          real(theme);
+          try{ window.__milk2048_audio.playBackgroundFor(theme === 'default' ? 'default' : theme); }catch(e){}
+        };
+      }
+    },200);
+  }
+
+  // Hook into move sound: patch doMove to play move sound on successful move
+  const origDoMove = window.doMove;
+  if(typeof origDoMove === 'function'){
+    window.doMove = function(dir){
+      const moved = origDoMove(dir);
+      // determine current theme
+      const t = localStorage.getItem('milk2048_theme') || 'default';
+      const theme = t === 'default' ? 'ocean' : t; // if default, fallback to ocean sound for moves
+      if(moved){
+        try{ window.__milk2048_audio.playMoveFor(theme); }catch(e){}
+      }
+      return moved;
+    };
+  } else {
+    // poll to patch later
+    const iv2 = setInterval(()=>{
+      if(typeof window.doMove === 'function'){
+        clearInterval(iv2);
+        const real = window.doMove;
+        window.doMove = function(dir){
+          const moved = real(dir);
+          const t = localStorage.getItem('milk2048_theme') || 'default';
+          const theme = t === 'default' ? 'ocean' : t;
+          if(moved){
+            try{ window.__milk2048_audio.playMoveFor(theme); }catch(e){}
+          }
+          return moved;
+        };
+      }
+    },200);
+  }
+
+})();
+*/
+
+</script>
+<script>
+// Embed the provided candy image as base64 JPEG (green background). Replace this with your processed PNG later if available.
+// To keep the diff small, paste the base64 payload between the markers in the main script ({{B64_CANDY}})
 </script>
 </body>
 </html>
