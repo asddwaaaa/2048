@@ -48,6 +48,17 @@ body.theme-space {
   --title-glow: rgba(156,39,176,0.8);
 }
 
+/* Bubble Gum Theme Variables */
+body.theme-bubblegum {
+  --accent: #ff79b0;
+  --panel: #fff0f6;
+  --text: #6b0f3b;
+  --board-bg: linear-gradient(180deg,#ffe0ef,#ffd1e8);
+  --cell-bg: linear-gradient(180deg,#ffeaf3,#ffd6ea);
+  --title-gradient: linear-gradient(45deg,#ff93c9 0%,#ff79b0 25%,#ff5fa1 50%,#ff8ac6 75%,#ffc1e3 100%);
+  --title-glow: rgba(255,121,176,0.6);
+}
+
 *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%}
 body{
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
@@ -79,6 +90,11 @@ body.theme-space {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%);
 }
 
+/* Bubble Gum Theme Body */
+body.theme-bubblegum {
+  background: linear-gradient(135deg, #ffd1e8 0%, #ff8ac6 50%, #ff79b0 100%);
+}
+
 .app{ 
   width:min(560px,96vw); 
   background:var(--panel); 
@@ -106,6 +122,13 @@ body.theme-space .app {
   color: #e1bee7;
 }
 
+/* Bubble Gum Theme App */
+body.theme-bubblegum .app { 
+  background: rgba(255,240,246,0.95); 
+  border-color:#ff79b0; 
+  box-shadow: 0 18px 50px rgba(255,121,176,0.2), 0 0 30px rgba(255,138,198,0.35); 
+}
+
 .header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .title{
   font-size:42px;
@@ -123,7 +146,7 @@ body.theme-space .app {
   position:relative;
   transition: all 0.5s ease;
 }
-/* restore classic title look: remove outline background */
+
 .title::after{ content:none; }
 
 /* Ocean Theme Title */
@@ -148,6 +171,18 @@ body.theme-space .title {
     0 30px 15px rgba(0,0,0,0.5),
     0 0 30px var(--title-glow);
   filter:drop-shadow(0 8px 16px rgba(74,20,140,0.3));
+}
+
+/* Bubble Gum Theme Title */
+body.theme-bubblegum .title {
+  text-shadow:
+    0 6px 0 rgba(255,121,176,0.8),
+    0 12px 0 rgba(255,121,176,0.6),
+    0 18px 0 rgba(255,121,176,0.4),
+    0 24px 0 rgba(255,121,176,0.2),
+    0 30px 15px rgba(255,121,176,0.3),
+    0 0 30px var(--title-glow);
+  filter:drop-shadow(0 8px 16px rgba(255,121,176,0.3));
 }
 
 .title::before{
@@ -176,6 +211,11 @@ body.theme-space .title::before {
   background:linear-gradient(45deg,#9c27b0,#ba68c8,#ce93d8);
 }
 
+/* Bubble Gum Theme Title Glow */
+body.theme-bubblegum .title::before {
+  background:linear-gradient(45deg,#ff79b0,#ffc1e3,#ff93c9);
+}
+
 @keyframes titleFloat{
   0%,100%{transform:perspective(400px) rotateX(12deg) rotateY(-2deg) translateY(0px)}
   50%{transform:perspective(400px) rotateX(12deg) rotateY(-2deg) translateY(-3px)}
@@ -194,6 +234,11 @@ body.theme-ocean .subtitle {
 /* Space Theme Subtitle */
 body.theme-space .subtitle {
   color: #ce93d8;
+}
+
+/* Bubble Gum Theme Subtitle */
+body.theme-bubblegum .subtitle{ 
+  color:#a83b73; 
 }
 
 .stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -215,6 +260,11 @@ body.theme-ocean .score-pill {
 /* Space Theme Score Pills */
 body.theme-space .score-pill {
   background:linear-gradient(180deg,var(--accent),#ba68c8);
+}
+
+/* Bubble Gum Theme Score Pills */
+body.theme-bubblegum .score-pill {
+  background:linear-gradient(180deg,var(--accent),#ff8ac6);
 }
 
 .controls{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
@@ -242,6 +292,14 @@ body.theme-space .btn {
   background: rgba(26,26,46,0.8);
   color: #e1bee7;
   border-color: rgba(156,39,176,0.3);
+}
+
+/* Bubble Gum Theme Buttons */
+body.theme-bubblegum .mode-btn, 
+body.theme-bubblegum .btn {
+  background: rgba(255,240,246,0.8);
+  color: var(--text);
+  border-color: rgba(255,121,176,0.2);
 }
 
 .mode-btn.active{
@@ -277,6 +335,11 @@ body.theme-space .board-shell {
   box-shadow: inset 0 6px 14px rgba(156,39,176,0.3), 0 12px 30px rgba(74,20,140,0.2);
 }
 
+/* Bubble Gum Theme Board Shell */
+body.theme-bubblegum .board-shell {
+  box-shadow: inset 0 6px 14px rgba(255,121,176,0.3), 0 12px 30px rgba(255,138,198,0.15);
+}
+
 .board{width:460px;height:460px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:16px;padding:14px;border-radius:12px;position:relative;overflow:hidden;max-width:100%;max-height:100%;touch-action:none}
 .cell{
   background: var(--cell-bg);
@@ -295,6 +358,11 @@ body.theme-space .cell {
   box-shadow: inset 0 4px 10px rgba(156,39,176,0.2), 0 6px 12px rgba(74,20,140,0.15);
 }
 
+/* Bubble Gum Theme Cells */
+body.theme-bubblegum .cell{ 
+  box-shadow: inset 0 4px 10px rgba(255,121,176,0.2), 0 6px 12px rgba(255,138,198,0.15); 
+}
+
 .tile{ 
   position:absolute;
   display:flex;
@@ -304,7 +372,7 @@ body.theme-space .cell {
   font-weight:900;
   color:#12343d;
   box-shadow: 0 12px 30px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.4); 
-  transition: transform 900ms cubic-bezier(.22,.9,.12,1), width 350ms, height 200ms, background 0.5s ease; 
+  transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94), width 350ms, height 200ms, background 0.5s ease; 
   user-select:none; 
   will-change:transform; 
   font-size:20px; 
@@ -349,6 +417,19 @@ body.theme-space .tile.v512{background:linear-gradient(180deg,#ce93d8,#ba68c8);c
 body.theme-space .tile.v1024{background:linear-gradient(180deg,#e1bee7,#ce93d8);color:#4a148c;font-size:18px}
 body.theme-space .tile.v2048{background:linear-gradient(180deg,#9c27b0,#6a1b9a);color:#fff;font-size:18px;box-shadow:0 12px 34px rgba(156,39,176,0.4)}
 
+/* Bubble Gum Theme Tiles */
+body.theme-bubblegum .tile.v2{ background: linear-gradient(180deg,#ffd6ea,#ffc1e3); color:#6b0f3b }
+body.theme-bubblegum .tile.v4{ background: linear-gradient(180deg,#ffc1e3,#ffaddb); color:#6b0f3b }
+body.theme-bubblegum .tile.v8{ background: linear-gradient(180deg,#ffaddb,#ff93c9); color:#fff }
+body.theme-bubblegum .tile.v16{ background: linear-gradient(180deg,#ff93c9,#ff79b0); color:#fff }
+body.theme-bubblegum .tile.v32{ background: linear-gradient(180deg,#ff79b0,#ff5fa1); color:#fff }
+body.theme-bubblegum .tile.v64{ background: linear-gradient(180deg,#ff5fa1,#ff4f95); color:#fff }
+body.theme-bubblegum .tile.v128{ background: linear-gradient(180deg,#ff4f95,#e83e86); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v256{ background: linear-gradient(180deg,#e83e86,#c72d73); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v512{ background: linear-gradient(180deg,#c72d73,#a61c60); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v1024{ background: linear-gradient(180deg,#a61c60,#8a124f); color:#fff; font-size:18px }
+body.theme-bubblegum .tile.v2048{ background: linear-gradient(180deg,#ff79b0,#ff4f95); color:#fff; font-size:18px; box-shadow:0 12px 34px rgba(255,121,176,0.4) }
+
 /* Default Theme Tiles */
 .tile.v2{background:linear-gradient(180deg,#e8f7fb,#dff3fb);color:#0e3b48}
 .tile.v4{background:linear-gradient(180deg,#dff3f9,#d0ecf9);color:#0e3b48}
@@ -361,6 +442,29 @@ body.theme-space .tile.v2048{background:linear-gradient(180deg,#9c27b0,#6a1b9a);
 .tile.v512{background:#5b4a9e;color:#fff;font-size:18px}
 .tile.v1024{background:#3e2f7b;color:#fff;font-size:18px}
 .tile.v2048{background:#2b1f59;color:#fff;font-size:18px;box-shadow:0 12px 34px rgba(0,0,0,0.25)}
+
+/* Chaos Mode Special Tiles */
+.tile.chaos-bomb{background:linear-gradient(135deg,#ff4757,#ff3742);color:#fff;font-size:24px}
+.tile.chaos-bomb::before{content:"💣";font-size:20px}
+.tile.chaos-multiplier{background:linear-gradient(135deg,#ffa502,#ff9500);color:#fff;font-size:24px}
+.tile.chaos-multiplier::before{content:"×2";font-size:16px;font-weight:900}
+.tile.chaos-freeze{background:linear-gradient(135deg,#70a1ff,#5352ed);color:#fff;font-size:24px}
+.tile.chaos-freeze::before{content:"❄️";font-size:20px}
+.tile.chaos-wildcard{background:linear-gradient(135deg,#7bed9f,#2ed573);color:#fff;font-size:24px}
+.tile.chaos-wildcard::before{content:"★";font-size:20px}
+.tile.chaos-shuffle{background:linear-gradient(135deg,#a4b0be,#747d8c);color:#fff;font-size:24px}
+.tile.chaos-shuffle::before{content:"🔀";font-size:16px}
+
+.tile.frozen{
+  filter: brightness(0.7) saturate(0.5);
+  border: 2px solid #70a1ff;
+  animation: frozenPulse 1s ease-in-out infinite;
+}
+
+@keyframes frozenPulse{
+  0%,100%{box-shadow: 0 0 10px rgba(112,161,255,0.5)}
+  50%{box-shadow: 0 0 20px rgba(112,161,255,0.8)}
+}
 
 @keyframes vibrate {0%{transform:translate(var(--tile-x),var(--tile-y)) rotate(0deg)}25%{transform:translate(calc(var(--tile-x) + 2px),var(--tile-y)) rotate(1deg)}50%{transform:translate(var(--tile-x),calc(var(--tile-y) + 2px)) rotate(-1deg)}75%{transform:translate(calc(var(--tile-x) - 2px),var(--tile-y)) rotate(1deg)}100%{transform:translate(var(--tile-x),var(--tile-y)) rotate(0deg)}}
 .tile.v1024{animation:vibrate .25s infinite linear}
@@ -449,6 +553,30 @@ body.theme-space #chaos-tips {
   color: #e1bee7;
 }
 
+/* Bubble Gum Theme Chaos Tips */
+body.theme-bubblegum #chaos-tips {
+  background: rgba(255,240,246,0.95);
+  border-color: #ff79b0;
+  color: #6b0f3b;
+}
+
+/* Bubble Gum Special Effects */
+body.theme-bubblegum .board-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="30" r="8" fill="rgba(255,121,176,0.3)" opacity="0.6"><animate attributeName="cy" values="30;10;30" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="70" r="6" fill="rgba(255,193,227,0.4)" opacity="0.5"><animate attributeName="cy" values="70;50;70" dur="4s" repeatCount="indefinite"/></circle><circle cx="50" cy="20" r="4" fill="rgba(255,138,198,0.3)" opacity="0.7"><animate attributeName="cy" values="20;5;20" dur="2.5s" repeatCount="indefinite"/></circle></svg>') repeat;
+  animation: bubbleFloat 15s linear infinite;
+  opacity: 0.4;
+}
+
+@keyframes bubbleFloat {
+  from { background-position: 0 0; }
+  to { background-position: 100px 0; }
+}
+
 @media(max-width:520px){ 
   .app{padding:12px} 
   #bottom-nav{left:8px;right:8px;height:72px} 
@@ -507,18 +635,23 @@ body.theme-space #chaos-tips {
   0%, 100% { transform: translate(var(--tile-x), var(--tile-y)) scale(1); filter: drop-shadow(0 0 8px rgba(156,39,176,0.3)); }
   50% { transform: translate(calc(var(--tile-x) + 1px), calc(var(--tile-y) - 4px)) scale(1.08); filter: drop-shadow(0 0 14px rgba(156,39,176,0.6)); }
 }
+@keyframes bubblegumBounce {
+  0%, 100% { transform: translate(var(--tile-x), var(--tile-y)) scale(1) rotate(0deg); }
+  50% { transform: translate(calc(var(--tile-x) + 2px), calc(var(--tile-y) - 5px)) scale(1.1) rotate(2deg); }
+}
 
 body.theme-ocean .tile { animation: oceanFloat 3s ease-in-out infinite; }
 body.theme-forest .tile { animation: forestRustle 2.5s ease-in-out infinite; }
 body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
+body.theme-bubblegum .tile { animation: bubblegumBounce 2.8s ease-in-out infinite; }
 
 /* Disable subtle floating animations on small screens to avoid overflow jitter */
 @media (max-width:520px){
   body.theme-ocean .tile,
   body.theme-forest .tile,
-  body.theme-space .tile { animation: none; }
+  body.theme-space .tile,
+  body.theme-bubblegum .tile { animation: none; }
 }
-
 
 /* === Additional mobile tweaks === */
 @media (max-width:400px){
@@ -532,36 +665,7 @@ body.theme-space .tile { animation: spaceFloat 4s ease-in-out infinite; }
 .btn-danger{ background: linear-gradient(135deg,#f44336,#d32f2f); color:#fff; border:none; }
 .btn-danger:hover{ filter: brightness(1.05); }
 
-/* Bubble Gum Theme Variables */
-body.theme-bubblegum {
-  --accent: #ff79b0;
-  --panel: #fff0f6;
-  --text: #6b0f3b;
-  --board-bg: linear-gradient(180deg,#ffe0ef,#ffd1e8);
-  --cell-bg: linear-gradient(180deg,#ffeaf3,#ffd6ea);
-  --title-gradient: linear-gradient(45deg,#ff93c9 0%,#ff79b0 25%,#ff5fa1 50%,#ff8ac6 75%,#ffc1e3 100%);
-  --title-glow: rgba(255,121,176,0.6);
-}
-body.theme-bubblegum .app { background: rgba(255,240,246,0.95); border-color:#ff79b0; box-shadow: 0 18px 50px rgba(255,121,176,0.2), 0 0 30px rgba(255,138,198,0.35); }
-body.theme-bubblegum .subtitle{ color:#a83b73; }
-body.theme-bubblegum .cell{ box-shadow: inset 0 4px 10px rgba(255,121,176,0.2), 0 6px 12px rgba(255,138,198,0.15); }
-body.theme-bubblegum .tile.v2{ background: linear-gradient(180deg,#ffd6ea,#ffc1e3); color:#6b0f3b }
-body.theme-bubblegum .tile.v4{ background: linear-gradient(180deg,#ffc1e3,#ffaddb); color:#6b0f3b }
-body.theme-bubblegum .tile.v8{ background: linear-gradient(180deg,#ffaddb,#ff93c9); color:#fff }
-body.theme-bubblegum .tile.v16{ background: linear-gradient(180deg,#ff93c9,#ff79b0); color:#fff }
-body.theme-bubblegum .tile.v32{ background: linear-gradient(180deg,#ff79b0,#ff5fa1); color:#fff }
-body.theme-bubblegum .tile.v64{ background: linear-gradient(180deg,#ff5fa1,#ff4f95); color:#fff }
-body.theme-bubblegum .tile.v128{ background: linear-gradient(180deg,#ff4f95,#e83e86); color:#fff; font-size:18px }
-body.theme-bubblegum .tile.v256{ background: linear-gradient(180deg,#e83e86,#c72d73); color:#fff; font-size:18px }
-body.theme-bubblegum .tile.v512{ background: linear-gradient(180deg,#c72d73,#a61c60); color:#fff; font-size:18px }
-body.theme-bubblegum .tile.v1024{ background: linear-gradient(180deg,#a61c60,#8a124f); color:#fff; font-size:18px }
-body.theme-bubblegum .tile.v2048{ background: linear-gradient(180deg,#ff79b0,#ff4f95); color:#fff; font-size:18px; box-shadow:0 12px 34px rgba(255,121,176,0.4) }
-
 /* Chupa Chups overlay */
-/* Replace simple candy icon with full-height image overlay inside wrapper */
-body.theme-bubblegum .board-shell::before,
-body.theme-bubblegum .board-shell::after{ content:none; }
-
 .board-shell .candy-wrap{ position:absolute; inset:10px; pointer-events:none; z-index:1; display:flex; align-items:flex-end; justify-content:flex-end; }
 .board-shell .candy{
   position:relative; height:100%; aspect-ratio: 9/16; object-fit:contain; filter: saturate(1.05) contrast(1.05) drop-shadow(0 10px 20px rgba(0,0,0,0.15));
@@ -614,7 +718,7 @@ body.theme-bubblegum .board-shell::after{ content:none; }
     </div>
   </div>
 </div>
-<div class="app" id="game-app" role="application" aria-label="2048 game">
+<div class="app" id="game-app" role="application" aria-label="2048 game" style="display:none;">
   <div class="header">
     <div>
       <div class="title">2048</div>
@@ -635,8 +739,8 @@ body.theme-bubblegum .board-shell::after{ content:none; }
     <div class="board-shell">
       <div id="game-board" class="board" aria-label="Игровое поле" tabindex="0"></div>
       <div class="candy-wrap">
-        <img class="candy candy--right" id="bubblegum-candy-1" alt="candy" />
-        <img class="candy candy--left" id="bubblegum-candy-2" alt="candy" />
+        <img class="candy candy--right" id="bubblegum-candy-1" alt="candy" style="display:none;" />
+        <img class="candy candy--left" id="bubblegum-candy-2" alt="candy" style="display:none;" />
       </div>
     </div>
     <aside id="chaos-tips" aria-hidden="true" class="chaos-aside">
@@ -649,7 +753,7 @@ body.theme-bubblegum .board-shell::after{ content:none; }
         <li>🔀 <b>Шафл</b> — перемешивает кубы</li>
       </ul>
     </aside>
-    <div style="margin-top:10px;font-size:13px;color:#45636c">Используй стрелки или свайпы. 
+    <div style="margin-top:10px;font-size:13px;color:#45636c">
   </div>
 </div>
 <div id="results-panel" class="results-panel" aria-hidden="true">
@@ -728,12 +832,26 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   const swishSound = new Audio(SWISH_SOUND_URL);
   swishSound.volume = 0.4;
   let grid = []; let tiles = {}; let nextId = 1; let score = 0; let best = parseInt(localStorage.getItem('milk2048_best')||'0',10)||0; let moves = 0; let seconds = 0; let timer = null; let mode = 'classic'; let purchasedBackgrounds = JSON.parse(localStorage.getItem('milk2048_purchased')||'["default"]'); let fakeBalance = parseInt(localStorage.getItem('milk2048_balance')||'0',10); let currentTheme = localStorage.getItem('milk2048_theme') || 'default';
+  let frozenTiles = {}; // Track frozen tiles
+  let freezeCountdown = 0; // Countdown for freeze effect
   
   // Apply saved theme on load
   function applyTheme(theme) {
     document.body.className = theme === 'default' ? '' : `theme-${theme}`;
     currentTheme = theme;
     localStorage.setItem('milk2048_theme', theme);
+    
+    // Show/hide bubble gum candies
+    const candy1 = document.getElementById('bubblegum-candy-1');
+    const candy2 = document.getElementById('bubblegum-candy-2');
+    if (theme === 'bubblegum') {
+      candy1.style.display = 'block';
+      candy2.style.display = 'block';
+    } else {
+      candy1.style.display = 'none';
+      candy2.style.display = 'none';
+    }
+    
     // Увеличенные тач-таргеты на мобильных
     try {
       const isMobile = window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
@@ -746,14 +864,34 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   }
   
   function emptyGrid(){ return Array.from({length:SIZE}, ()=> Array(SIZE).fill(0)); }
-  function resetState(){ grid = emptyGrid(); tiles = {}; nextId = 1; score = 0; moves = 0; seconds = 0; }
+  function resetState(){ grid = emptyGrid(); tiles = {}; nextId = 1; score = 0; moves = 0; seconds = 0; frozenTiles = {}; freezeCountdown = 0; }
   function startTimer(){ if(timer) clearInterval(timer); timer=setInterval(()=>{ seconds++; /* time hidden */ },1000); }
   function stopTimer(){ if(timer) clearInterval(timer); timer=null; }
   function formatTime(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
-  function saveState(){ try{ localStorage.setItem('milk2048_state', JSON.stringify({grid,tiles,nextId,score,best,moves,seconds,mode})); localStorage.setItem('milk2048_best', String(best)); }catch(e){console.warn(e);} }
-  function loadState(){ try{ const raw=localStorage.getItem('milk2048_state'); if(!raw) return false; const d=JSON.parse(raw); if(!d) return false; grid=d.grid||emptyGrid(); tiles=d.tiles||{}; nextId=d.nextId||1; score=d.score||0; best=d.best||best; moves=d.moves||0; seconds=d.seconds||0; mode=d.mode||'classic'; return true; }catch(e){return false;} }
+  function saveState(){ try{ localStorage.setItem('milk2048_state', JSON.stringify({grid,tiles,nextId,score,best,moves,seconds,mode,frozenTiles,freezeCountdown})); localStorage.setItem('milk2048_best', String(best)); }catch(e){console.warn(e);} }
+  function loadState(){ try{ const raw=localStorage.getItem('milk2048_state'); if(!raw) return false; const d=JSON.parse(raw); if(!d) return false; grid=d.grid||emptyGrid(); tiles=d.tiles||{}; nextId=d.nextId||1; score=d.score||0; best=d.best||best; moves=d.moves||0; seconds=d.seconds||0; mode=d.mode||'classic'; frozenTiles=d.frozenTiles||{}; freezeCountdown=d.freezeCountdown||0; return true; }catch(e){return false;} }
   function createTile(value,r,c,specialType=null){ const id='t'+(nextId++); const t={id,value,r,c,specialType,frozen:false}; tiles[id]=t; grid[r][c]=id; return t; }
-  function addRandom(){ const empties=[]; for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) empties.push({r,c}); if(!empties.length) return false; const pos = empties[Math.floor(Math.random()*empties.length)]; let v = Math.random()<0.9?2:4; if(mode==='chaos'){ const r=Math.random(); if(r<0.05){ const types=['bomb','multiplier','freeze','wildcard','shuffle']; const t=types[Math.floor(Math.random()*types.length)]; createTile(0,pos.r,pos.c,t); return true; } if(r<0.12) v = Math.random()<0.5?4:8; } createTile(v,pos.r,pos.c); return true; }
+  
+  function addRandom(){ 
+    const empties=[]; 
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) empties.push({r,c}); 
+    if(!empties.length) return false; 
+    const pos = empties[Math.floor(Math.random()*empties.length)]; 
+    let v = Math.random()<0.9?2:4; 
+    if(mode==='chaos'){ 
+      const r=Math.random(); 
+      if(r<0.08){ 
+        const types=['bomb','multiplier','freeze','wildcard','shuffle']; 
+        const t=types[Math.floor(Math.random()*types.length)]; 
+        createTile(0,pos.r,pos.c,t); 
+        return true; 
+      } 
+      if(r<0.15) v = Math.random()<0.5?4:8; 
+    } 
+    createTile(v,pos.r,pos.c); 
+    return true; 
+  }
+  
   function computeSizes(){
     // Гибкая адаптация размеров: используем фактический клиентский размер и страхуемся на мобильных
     const rect = boardEl.getBoundingClientRect();
@@ -767,8 +905,163 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
     const cell = Math.max(0, (side - padding*2 - totalGap)/SIZE);
     return {cell,gap,padding};
   }
-  function render(){ boardEl.innerHTML=''; for(let i=0;i<SIZE*SIZE;i++){ const cell = document.createElement('div'); cell.className='cell'; boardEl.appendChild(cell); } const sizes = computeSizes(); const cellSize = sizes.cell, gap=sizes.gap, padding=sizes.padding; Object.values(tiles).forEach(t=>{ if(!t) return; if(t.value<=0 && !t.specialType) return; let el = document.querySelector('[data-id="'+t.id+'"]'); const existed = !!el; if(!el){ el = document.createElement('div'); el.dataset.id = t.id; boardEl.appendChild(el); } if(t.specialType) el.className = 'tile chaos-'+t.specialType; else el.className = 'tile v'+t.value; if(t.value===1024) el.classList.add('v1024'); else el.classList.remove('v1024'); if(t.value>=2048) el.classList.add('v2048'); else el.classList.remove('v2048'); if(t.value>=4096) el.classList.add('legendary'); else el.classList.remove('legendary'); if(t.frozen) el.classList.add('frozen'); else el.classList.remove('frozen'); el.textContent = t.specialType? '': (t.value>0? t.value : ''); const x = Math.round(padding + (cellSize+gap)*t.c); const y = Math.round(padding + (cellSize+gap)*t.r); el.style.setProperty('--tile-x', x+'px'); el.style.setProperty('--tile-y', y+'px'); el.style.width = Math.max(0, Math.floor(cellSize))+'px'; el.style.height = Math.max(0, Math.floor(cellSize))+'px'; el.style.transform = 'translate('+x+'px,'+y+'px)'; el.style.willChange = 'transform'; el.style.transitionTimingFunction = 'cubic-bezier(0.22, 1, 0.36, 1)'; el.style.transitionDuration = '720ms'; if(!existed){ el.classList.add('new'); setTimeout(()=>el.classList.remove('new'), 420); } }); scoreEl.textContent = score; bestEl.textContent = best; movesEl.textContent = moves; }
-  function canMove(){ for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) return true; for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){ const id = grid[r][c]; if(!id) continue; const t = tiles[id]; if(!t || t.specialType) continue; const v = t.value; const dirs = [[1,0],[0,1]]; for(const d of dirs){ const rr=r+d[0], cc=c+d[1]; if(rr<0||rr>=SIZE||cc<0||cc>=SIZE) continue; const id2 = grid[rr][cc]; if(!id2) continue; const t2 = tiles[id2]; if(!t2 || t2.specialType) continue; if(t2.value===v) return true; } } return false; }
+  
+  function render(){ 
+    boardEl.innerHTML=''; 
+    for(let i=0;i<SIZE*SIZE;i++){ 
+      const cell = document.createElement('div'); 
+      cell.className='cell'; 
+      boardEl.appendChild(cell); 
+    } 
+    const sizes = computeSizes(); 
+    const cellSize = sizes.cell, gap=sizes.gap, padding=sizes.padding; 
+    Object.values(tiles).forEach(t=>{ 
+      if(!t) return; 
+      if(t.value<=0 && !t.specialType) return; 
+      let el = document.querySelector('[data-id="'+t.id+'"]'); 
+      const existed = !!el; 
+      if(!el){ 
+        el = document.createElement('div'); 
+        el.dataset.id = t.id; 
+        boardEl.appendChild(el); 
+      } 
+      if(t.specialType) el.className = 'tile chaos-'+t.specialType; 
+      else el.className = 'tile v'+t.value; 
+      if(t.value===1024) el.classList.add('v1024'); 
+      else el.classList.remove('v1024'); 
+      if(t.value>=2048) el.classList.add('v2048'); 
+      else el.classList.remove('v2048'); 
+      if(t.value>=4096) el.classList.add('legendary'); 
+      else el.classList.remove('legendary'); 
+      if(t.frozen || frozenTiles[t.id]) el.classList.add('frozen'); 
+      else el.classList.remove('frozen'); 
+      el.textContent = t.specialType? '': (t.value>0? t.value : ''); 
+      const x = Math.round(padding + (cellSize+gap)*t.c); 
+      const y = Math.round(padding + (cellSize+gap)*t.r); 
+      el.style.setProperty('--tile-x', x+'px'); 
+      el.style.setProperty('--tile-y', y+'px'); 
+      el.style.width = Math.max(0, Math.floor(cellSize))+'px'; 
+      el.style.height = Math.max(0, Math.floor(cellSize))+'px'; 
+      el.style.transform = 'translate('+x+'px,'+y+'px)'; 
+      el.style.willChange = 'transform'; 
+      el.style.transitionTimingFunction = 'cubic-bezier(0.22, 1, 0.36, 1)'; 
+      el.style.transitionDuration = '400ms'; 
+      if(!existed){ 
+        el.classList.add('new'); 
+        setTimeout(()=>el.classList.remove('new'), 420); 
+      } 
+    }); 
+    scoreEl.textContent = score; 
+    bestEl.textContent = best; 
+    movesEl.textContent = moves; 
+  }
+  
+  function canMove(){ 
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) return true; 
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){ 
+      const id = grid[r][c]; 
+      if(!id) continue; 
+      const t = tiles[id]; 
+      if(!t || t.specialType) continue; 
+      const v = t.value; 
+      const dirs = [[1,0],[0,1]]; 
+      for(const d of dirs){ 
+        const rr=r+d[0], cc=c+d[1]; 
+        if(rr<0||rr>=SIZE||cc<0||cc>=SIZE) continue; 
+        const id2 = grid[rr][cc]; 
+        if(!id2) continue; 
+        const t2 = tiles[id2]; 
+        if(!t2 || t2.specialType) continue; 
+        if(t2.value===v) return true; 
+      } 
+    } 
+    return false; 
+  }
+  
+  // Handle special tiles effects
+  function handleSpecialTile(tile, r, c) {
+    if (!tile.specialType) return;
+    
+    switch(tile.specialType) {
+      case 'bomb':
+        // Destroy adjacent tiles
+        for(let dr = -1; dr <= 1; dr++) {
+          for(let dc = -1; dc <= 1; dc++) {
+            const nr = r + dr, nc = c + dc;
+            if(nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+              const adjId = grid[nr][nc];
+              if(adjId && adjId !== tile.id) {
+                delete tiles[adjId];
+                grid[nr][nc] = 0;
+              }
+            }
+          }
+        }
+        break;
+        
+      case 'multiplier':
+        // Double adjacent tiles
+        for(let dr = -1; dr <= 1; dr++) {
+          for(let dc = -1; dc <= 1; dc++) {
+            const nr = r + dr, nc = c + dc;
+            if(nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+              const adjId = grid[nr][nc];
+              if(adjId && adjId !== tile.id) {
+                const adjTile = tiles[adjId];
+                if(adjTile && !adjTile.specialType && adjTile.value > 0) {
+                  adjTile.value *= 2;
+                  score += adjTile.value;
+                }
+              }
+            }
+          }
+        }
+        break;
+        
+      case 'freeze':
+        // Freeze all tiles for 3 moves
+        freezeCountdown = 3;
+        Object.keys(tiles).forEach(id => {
+          if(tiles[id] && !tiles[id].specialType) {
+            frozenTiles[id] = true;
+          }
+        });
+        break;
+        
+      case 'shuffle':
+        // Shuffle all tiles
+        const allTiles = Object.values(tiles).filter(t => t && (t.value > 0 || t.specialType));
+        const positions = [];
+        for(let r = 0; r < SIZE; r++) {
+          for(let c = 0; c < SIZE; c++) {
+            if(grid[r][c]) positions.push({r, c});
+          }
+        }
+        
+        // Clear grid
+        grid = emptyGrid();
+        
+        // Shuffle positions
+        for(let i = positions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [positions[i], positions[j]] = [positions[j], positions[i]];
+        }
+        
+        // Reassign tiles to shuffled positions
+        allTiles.forEach((tile, index) => {
+          if(positions[index]) {
+            tile.r = positions[index].r;
+            tile.c = positions[index].c;
+            grid[tile.r][tile.c] = tile.id;
+          }
+        });
+        break;
+    }
+    
+    // Remove the special tile after use
+    delete tiles[tile.id];
+    grid[r][c] = 0;
+  }
   
   // ИСПРАВЛЕННАЯ ФУНКЦИЯ ДВИЖЕНИЯ
   function moveLeft(){ 
@@ -782,7 +1075,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
       const compact = row.filter(x=>x && (x.value>0 || x.specialType)); 
       const processed = []; 
       for(let i=0;i<compact.length;i++){ 
-        if(i+1<compact.length && !compact[i].specialType && !compact[i+1].specialType && compact[i].value>0 && compact[i].value===compact[i+1].value){ 
+        if(i+1<compact.length && !compact[i].specialType && !compact[i+1].specialType && compact[i].value>0 && compact[i].value===compact[i+1].value && !frozenTiles[compact[i].id] && !frozenTiles[compact[i+1].id]){ 
           compact[i].value *= 2; 
           score += compact[i].value; 
           if(score>best){ 
@@ -808,6 +1101,10 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
           grid[r][c]=item.id; 
           item.r=r; 
           item.c=c; 
+          // Handle special tiles
+          if(item.specialType) {
+            handleSpecialTile(item, r, c);
+          }
         } else { 
           grid[r][c]=0; 
         } 
@@ -830,7 +1127,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
       for(let i=0;i<nonEmpty.length;i++){
         const a = nonEmpty[i];
         const b = nonEmpty[i+1];
-        if(b && !a.specialType && !b.specialType && a.value === b.value){
+        if(b && !a.specialType && !b.specialType && a.value === b.value && !frozenTiles[a.id] && !frozenTiles[b.id]){
           a.value *= 2;
           score += a.value;
           if(score>best){ best = score; localStorage.setItem('milk2048_best', String(best)); }
@@ -847,6 +1144,9 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
           grid[r][c] = item.id;
           item.r = r;
           item.c = c;
+          if(item.specialType) {
+            handleSpecialTile(item, r, c);
+          }
         } else grid[r][c] = 0;
         if(prev !== grid[r][c]) moved = true;
       }
@@ -866,7 +1166,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
       const compact = row.filter(x => x && (x.value > 0 || x.specialType));
       const processed = [];
       for(let i=0;i<compact.length;i++){
-        if(i+1<compact.length && !compact[i].specialType && !compact[i+1].specialType && compact[i].value>0 && compact[i].value===compact[i+1].value){
+        if(i+1<compact.length && !compact[i].specialType && !compact[i+1].specialType && compact[i].value>0 && compact[i].value===compact[i+1].value && !frozenTiles[compact[i].id] && !frozenTiles[compact[i+1].id]){
           compact[i].value *= 2;
           score += compact[i].value;
           if(score>best){
@@ -893,6 +1193,9 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
           grid[r][actualCol] = item.id;
           item.r = r;
           item.c = actualCol;
+          if(item.specialType) {
+            handleSpecialTile(item, r, actualCol);
+          }
         } else {
           grid[r][actualCol] = 0;
         }
@@ -915,7 +1218,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
       for(let i=0;i<nonEmpty.length;i++){
         const a = nonEmpty[i];
         const b = nonEmpty[i+1];
-        if(b && !a.specialType && !b.specialType && a.value === b.value){
+        if(b && !a.specialType && !b.specialType && a.value === b.value && !frozenTiles[a.id] && !frozenTiles[b.id]){
           a.value *= 2;
           score += a.value;
           if(score>best){ best = score; localStorage.setItem('milk2048_best', String(best)); }
@@ -933,6 +1236,9 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
           grid[targetR][c] = item.id;
           item.r = targetR;
           item.c = c;
+          if(item.specialType) {
+            handleSpecialTile(item, targetR, c);
+          }
         } else grid[targetR][c] = 0;
         if(prev !== grid[targetR][c]) moved = true;
       }
@@ -955,6 +1261,15 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
     
     if(moved) {
       moves++;
+      
+      // Handle freeze countdown
+      if(freezeCountdown > 0) {
+        freezeCountdown--;
+        if(freezeCountdown === 0) {
+          frozenTiles = {};
+        }
+      }
+      
       setTimeout(()=>{ 
         addRandom(); 
         render(); 
@@ -1076,7 +1391,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
       color: white; padding: 16px 24px; border-radius: 12px;
       font-weight: 700; box-shadow: 0 8px 32px rgba(76,175,80,0.4);
       animation: slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
-    `;
+    `
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
@@ -1100,7 +1415,7 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   function createFireworks(){ for(let i=0;i<15;i++){ setTimeout(()=>{ const firework = document.createElement('div'); firework.className='firework'; firework.style.left = Math.random()*100+'%'; firework.style.top = '100vh'; firework.style.zIndex = 9999; document.body.appendChild(firework); setTimeout(()=> firework.remove(), 3000); }, i*200); } }
   function launchMegaConfetti(){ const conf = document.createElement('div'); conf.style.position='fixed'; conf.style.left=0; conf.style.top=0; conf.style.width='100%'; conf.style.height='100%'; conf.style.pointerEvents='none'; conf.style.zIndex=9999; document.body.appendChild(conf); const emojis=['🎉','✨','💫','🌟','🥳','🎊','🎈','🏆','👑','💎','⭐','🔥']; for(let i=0;i<80;i++){ const s=document.createElement('div'); s.textContent=emojis[Math.floor(Math.random()*emojis.length)]; s.style.position='absolute'; s.style.left = Math.random()*100+'%'; s.style.top = '-10%'; s.style.fontSize = (15+Math.random()*40)+'px'; s.style.transition = 'all 3s cubic-bezier(0.25,0.46,0.45,0.94)'; s.style.animation = 'float 2s ease-in-out infinite'; conf.appendChild(s); setTimeout(()=>{ s.style.top = (120+Math.random()*30)+'%'; s.style.transform = 'rotate('+ (Math.random()*1080-540) +'deg) scale('+ (0.5+Math.random()*1.5) +')'; s.style.opacity = 0; }, 50 + i*30); } setTimeout(()=> conf.remove(), 4000); }
   function launchConfetti(){ launchMegaConfetti(); createFireworks(); }
-  document.getElementById('new-game-btn')?.addEventListener('click', ()=>{ resetState(); addRandom(); addRandom(); render(); saveState(); startTimer(); });
+  document.getElementById('new-game-btn')?.addEventListener('click', () => {resetState();addRandom();addRandom();render();saveState();startTimer();});
   document.getElementById('mode-classic')?.addEventListener('click', ()=>{ mode='classic'; document.getElementById('mode-classic').classList.add('active'); document.getElementById('mode-chaos').classList.remove('active'); chaosTips.style.display='none'; saveState(); });
   document.getElementById('mode-chaos')?.addEventListener('click', ()=>{ mode='chaos'; document.getElementById('mode-chaos').classList.add('active'); document.getElementById('mode-classic').classList.remove('active'); chaosTips.style.display='block'; saveState(); });
   document.getElementById('close-results')?.addEventListener('click', ()=>{ document.getElementById('results-panel').style.display='none'; document.querySelectorAll('#bottom-nav .nav-btn').forEach(b=>b.classList.remove('active')); document.querySelector('#bottom-nav .nav-btn[data-target="game-app"]').classList.add('active'); });
@@ -1379,70 +1694,29 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
   // Apply saved theme
   applyTheme(currentTheme);
 
-  // Runtime chroma-key for supplied green-screen candy image
-  (function(){
-    const GREEN_SRC = 'data:image/jpeg;base64,'; // placeholder, will set below
-    const b64 = `{{B64_CANDY}}`;
-    const src = b64 && b64.length>100 ? 'data:image/jpeg;base64,'+b64 : GREEN_SRC;
-
-    function chromaKeyImage(src, opts){
-      return new Promise((resolve)=>{
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = ()=>{
-          const w = img.naturalWidth, h = img.naturalHeight;
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img,0,0);
-          const imgData = ctx.getImageData(0,0,w,h);
-          const d = imgData.data;
-          const {
-            key = {r:0,g:255,b:0},
-            tol = 80,
-            soft = 30
-          } = opts||{};
-          const kr=key.r, kg=key.g, kb=key.b;
-          for(let i=0;i<d.length;i+=4){
-            const r=d[i], g=d[i+1], b=d[i+2];
-            const dist = Math.sqrt((r-kr)*(r-kr)+(g-kg)*(g-kg)+(b-kb)*(b-kb));
-            let alpha = 255;
-            if(dist < tol){
-              alpha = 0;
-            } else if(dist < tol+soft){
-              const t = (dist - tol)/soft; // 0..1
-              alpha = Math.round(255*t);
-            }
-            d[i+3] = alpha;
-          }
-          ctx.putImageData(imgData,0,0);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = ()=>resolve(src);
-        img.src = src;
-      });
-    }
-
-    async function ensureCandies(){
-      const c1 = document.getElementById('bubblegum-candy-1');
-      const c2 = document.getElementById('bubblegum-candy-2');
-      if(!c1 || !c2) return;
-      const keyed = await chromaKeyImage(src, { tol: 85, soft: 45 });
-      c1.src = keyed; c2.src = keyed;
-    }
-
-    // run on load and when theme changes to bubblegum
-    ensureCandies();
-    const origApply = window.milk2048?.applyTheme;
-    if(typeof origApply === 'function' && !window.__bubblegumPatched){
-      window.__bubblegumPatched = true;
-      window.milk2048.applyTheme = function(theme){
-        const r = origApply(theme);
-        if(theme==='bubblegum') ensureCandies();
-        return r;
-      };
-    }
-  })();
+  // Create candy images for bubble gum theme
+  const candyDataUrl = 'data:image/svg+xml;base64,' + btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="200" viewBox="0 0 100 200">
+      <defs>
+        <radialGradient id="candyGrad" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" style="stop-color:#ff79b0;stop-opacity:1" />
+          <stop offset="70%" style="stop-color:#ff5fa1;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#e83e86;stop-opacity:1" />
+        </radialGradient>
+        <linearGradient id="stickGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#ffae00;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="60" r="35" fill="url(#candyGrad)" stroke="#ff4f95" stroke-width="2"/>
+      <circle cx="50" cy="60" r="25" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="45" cy="55" r="8" fill="rgba(255,255,255,0.6)"/>
+      <rect x="47" y="95" width="6" height="100" fill="url(#stickGrad)" stroke="#e6ac00" stroke-width="1"/>
+    </svg>
+  `);
+  
+  document.getElementById('bubblegum-candy-1').src = candyDataUrl;
+  document.getElementById('bubblegum-candy-2').src = candyDataUrl;
   
   // Export essential APIs to window so external systems (audio) can patch safely
   window.milk2048 = { resetState, render, addMoney, applyTheme, doMove };
@@ -1453,29 +1727,47 @@ const SWISH_SOUND_URL = 'https://actions.google.com/sounds/v1/office/paper_tear.
 window.__milk2048_themeAudio?.cleanup?.();
 
 const themeSounds = {
+  default: {
+    bg: null, // No background music for default theme
+    move: new Audio('https://actions.google.com/sounds/v1/water/bubble.ogg')
+  },
   ocean: {
     bg: new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_ebd01d6a64.mp3?filename=ocean-waves-ambient.mp3'),
-    move: new Audio('https://cdn.pixabay.com/download/audio/2022/03/16/audio_62a7a0dc09.mp3?filename=wave-hit.mp3')
+    move: new Audio('https://actions.google.com/sounds/v1/water/water_droplet_on_water.ogg')
   },
   forest: {
     bg: new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_07e1d48d10.mp3?filename=forest-birds.mp3'),
-    move: new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_1794a4f178.mp3?filename=leaf-rustle.mp3')
+    move: new Audio('https://actions.google.com/sounds/v1/foley/rustling_leaves.ogg')
   },
   space: {
     bg: new Audio('https://cdn.pixabay.com/download/audio/2022/02/16/audio_8e1f16e7a3.mp3?filename=deep-space-hum.mp3'),
-    move: new Audio('https://cdn.pixabay.com/download/audio/2022/02/14/audio_7a5977c620.mp3?filename=laser-swish.mp3')
+    move: new Audio('https://actions.google.com/sounds/v1/sci_fi/laser_beam.ogg')
+  },
+  bubblegum: {
+    bg: new Audio('https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg'),
+    move: new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg')
   }
 };
 
-for (const t of Object.values(themeSounds)) {
-  t.bg.loop = true;
-  t.bg.volume = 0.25; // чуть тише, чтобы не мешать
-  t.move.volume = 0.55;
+for (const theme of Object.keys(themeSounds)) {
+  const sounds = themeSounds[theme];
+  if (sounds.bg) {
+    sounds.bg.loop = true;
+    sounds.bg.volume = 0.25; // чуть тише, чтобы не мешать
+  }
+  if (sounds.move) {
+    sounds.move.volume = 0.55;
+  }
 }
 
 function playThemeSound(theme) {
-  Object.values(themeSounds).forEach(s => s.bg.pause());
-  if (themeSounds[theme]) {
+  // Stop all background sounds
+  Object.values(themeSounds).forEach(s => {
+    if (s.bg) s.bg.pause();
+  });
+  
+  // Play background for current theme
+  if (themeSounds[theme] && themeSounds[theme].bg) {
     themeSounds[theme].bg.currentTime = 0;
     themeSounds[theme].bg.play().catch(()=>{});
   }
@@ -1484,7 +1776,7 @@ function playThemeSound(theme) {
 function playMoveSound() {
   try {
     const theme = (localStorage.getItem('milk2048_theme') || 'default');
-    if (theme !== 'default' && themeSounds[theme]) {
+    if (themeSounds[theme] && themeSounds[theme].move) {
       themeSounds[theme].move.currentTime = 0;
       themeSounds[theme].move.play().catch(()=>{});
     }
@@ -1515,10 +1807,14 @@ if(!window.__milk2048_themeAudio.patchedTheme && window.milk2048 && typeof windo
 
 // Метод очистки (на случай HMR/перегрузки)
 window.__milk2048_themeAudio.cleanup = function(){
-  try { Object.values(themeSounds).forEach(s=>{ s.bg.pause(); s.bg.src=''; s.move.src=''; }); } catch(e){}
+  try { 
+    Object.values(themeSounds).forEach(s=>{
+      if(s.bg) { s.bg.pause(); s.bg.src=''; }
+      if(s.move) { s.move.src=''; }
+    }); 
+  } catch(e){}
   window.__milk2048_themeAudio = undefined;
 };
-
 
 // === ENABLE SOUND ON FIRST CLICK ===
 let __audioUnlocked = false;
@@ -1531,11 +1827,15 @@ function enableAudioOnce() {
       playThemeSound(theme);
     }
     Object.values(themeSounds).forEach(s => {
-      s.bg.muted = false;
-      s.move.muted = false;
-      // Prime audio to satisfy autoplay policies
-      try { s.bg.play().then(()=>{ s.bg.pause(); s.bg.currentTime = 0; }).catch(()=>{}); } catch(e){}
-      try { s.move.play().then(()=>{ s.move.pause(); s.move.currentTime = 0; }).catch(()=>{}); } catch(e){}
+      if(s.bg) {
+        s.bg.muted = false;
+        // Prime audio to satisfy autoplay policies
+        try { s.bg.play().then(()=>{ s.bg.pause(); s.bg.currentTime = 0; }).catch(()=>{}); } catch(e){}
+      }
+      if(s.move) {
+        s.move.muted = false;
+        try { s.move.play().then(()=>{ s.move.pause(); s.move.currentTime = 0; }).catch(()=>{}); } catch(e){}
+      }
     });
   } catch(e) {}
   console.log('🔊 Audio unlocked by user gesture');
@@ -1543,149 +1843,6 @@ function enableAudioOnce() {
 document.addEventListener('click', enableAudioOnce, { once: true });
 document.addEventListener('touchstart', enableAudioOnce, { once: true });
 
-
-// === ADDED: Audio & play-on-first-action initialization ===
-// Убираем дубль альтернативной системы аудио — оставляем единую реализацию выше
-/* (disabled duplicate)
-(function(){
-  // URLs (royalty-free samples)
-  const bgUrls = {
-    ocean: 'https://cdn.pixabay.com/download/audio/2021/09/14/audio_45b8c459a7.mp3?filename=ocean-waves-ambient.mp3',
-    forest: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_4e8ef8b3c1.mp3?filename=forest-nature-sounds.mp3',
-    space: 'https://cdn.pixabay.com/download/audio/2023/02/23/audio_9a0b1e2b35.mp3?filename=ambient-space-pad.mp3'
-  };
-  const moveUrls = {
-    ocean: 'https://cdn.pixabay.com/download/audio/2021/09/14/audio_252c66ab7b.mp3?filename=small-wave.mp3',
-    forest: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_efbc1b67f2.mp3?filename=rustling-leaves.mp3',
-    space: 'https://cdn.pixabay.com/download/audio/2023/02/15/audio_3d1297d3f9.mp3?filename=whoosh-space.mp3'
-  };
-
-  const bgSounds = {};
-  const moveSounds = {};
-  let audioInitialized = false;
-  // Create Audio objects but do not play yet
-  function createAudioObjects(){
-    for(const k of Object.keys(bgUrls)){
-      const a = new Audio(bgUrls[k]);
-      a.loop = true;
-      a.volume = 0.35;
-      bgSounds[k] = a;
-    }
-    for(const k of Object.keys(moveUrls)){
-      const a = new Audio(moveUrls[k]);
-      a.volume = 0.55;
-      moveSounds[k] = a;
-    }
-  }
-
-  // Play background corresponding to current theme
-  function playBackgroundForTheme(theme){
-    // pause all
-    Object.values(bgSounds).forEach(x=>{ try{x.pause(); x.currentTime = 0;}catch(e){} });
-    if(theme === 'default') return;
-    const key = theme;
-    const a = bgSounds[key];
-    if(a){
-      a.currentTime = 0;
-      a.play().catch(()=>{});
-    }
-  }
-  // Play move sound
-  function playMoveSoundForTheme(theme){
-    const key = theme;
-    const a = moveSounds[key];
-    if(a){
-      try{ a.currentTime = 0; a.play().catch(()=>{}); }catch(e){}
-    }
-  }
-
-  // Expose small API on window for use in existing code
-  window.__milk2048_audio = {
-    initOnce: function(){
-      if(audioInitialized) return;
-      createAudioObjects();
-      audioInitialized = true;
-      // start background for current theme (read from localStorage or default)
-      const stored = localStorage.getItem('milk2048_theme') || 'default';
-      const theme = stored === 'default' ? 'default' : stored;
-      playBackgroundForTheme(theme);
-    },
-    playBackgroundFor: playBackgroundForTheme,
-    playMoveFor: playMoveSoundForTheme
-  };
-
-  // Start audio on first user action: click/tap/keydown or tutorial-start button
-  function userGestureHandler(){
-    try{ window.__milk2048_audio.initOnce(); }catch(e){}
-    // remove listeners after first interaction
-    document.removeEventListener('click', userGestureHandler, true);
-    document.removeEventListener('touchstart', userGestureHandler, true);
-    document.removeEventListener('keydown', userGestureHandler, true);
-  }
-  document.addEventListener('click', userGestureHandler, true);
-  document.addEventListener('touchstart', userGestureHandler, true);
-  document.addEventListener('keydown', userGestureHandler, true);
-
-  // Hook into theme changes if applyTheme exists
-  const origApply = window.applyTheme;
-  if(typeof origApply === 'function'){
-    window.applyTheme = function(theme){
-      origApply(theme);
-      try{ window.__milk2048_audio.playBackgroundFor(theme === 'default' ? 'default' : theme); }catch(e){}
-    };
-  } else {
-    // if applyTheme not yet defined, poll for it
-    const iv = setInterval(()=>{
-      if(typeof window.applyTheme === 'function'){
-        clearInterval(iv);
-        const real = window.applyTheme;
-        window.applyTheme = function(theme){
-          real(theme);
-          try{ window.__milk2048_audio.playBackgroundFor(theme === 'default' ? 'default' : theme); }catch(e){}
-        };
-      }
-    },200);
-  }
-
-  // Hook into move sound: patch doMove to play move sound on successful move
-  const origDoMove = window.doMove;
-  if(typeof origDoMove === 'function'){
-    window.doMove = function(dir){
-      const moved = origDoMove(dir);
-      // determine current theme
-      const t = localStorage.getItem('milk2048_theme') || 'default';
-      const theme = t === 'default' ? 'ocean' : t; // if default, fallback to ocean sound for moves
-      if(moved){
-        try{ window.__milk2048_audio.playMoveFor(theme); }catch(e){}
-      }
-      return moved;
-    };
-  } else {
-    // poll to patch later
-    const iv2 = setInterval(()=>{
-      if(typeof window.doMove === 'function'){
-        clearInterval(iv2);
-        const real = window.doMove;
-        window.doMove = function(dir){
-          const moved = real(dir);
-          const t = localStorage.getItem('milk2048_theme') || 'default';
-          const theme = t === 'default' ? 'ocean' : t;
-          if(moved){
-            try{ window.__milk2048_audio.playMoveFor(theme); }catch(e){}
-          }
-          return moved;
-        };
-      }
-    },200);
-  }
-
-})();
-*/
-
-</script>
-<script>
-// Embed the provided candy image as base64 JPEG (green background). Replace this with your processed PNG later if available.
-// To keep the diff small, paste the base64 payload between the markers in the main script ({{B64_CANDY}})
 </script>
 </body>
 </html>
