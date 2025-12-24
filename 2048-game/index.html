@@ -24,6 +24,7 @@
   --text-light: #f5e6d3;
   --accent: #8b7355;
   --shadow: rgba(0,0,0,0.1);
+  --cell-bg: #d4c4b0;
 }
 
 /* Темы */
@@ -45,6 +46,7 @@
   --text-dark: #f0e6d3;
   --text-light: #2d2d2d;
   --accent: #d3bb9d;
+  --cell-bg: #2a2a2a;
 }
 
 .theme-ocean {
@@ -65,6 +67,7 @@
   --text-dark: #004d40;
   --text-light: #e0f2f1;
   --accent: #00838f;
+  --cell-bg: #a5d6d6;
 }
 
 .theme-forest {
@@ -85,6 +88,7 @@
   --text-dark: #1b5e20;
   --text-light: #e8f5e8;
   --accent: #4caf50;
+  --cell-bg: #a5d6a7;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -115,7 +119,7 @@ body {
   gap: 10px;
 }
 
-/* Объемный 3D заголовок с правильными тенями */
+/* Объемный 3D заголовок */
 h1 {
   font-size: 52px;
   font-weight: 700;
@@ -126,7 +130,6 @@ h1 {
     0 6px 0 rgba(0,0,0,0.1),
     0 8px 8px var(--shadow);
   transform: perspective(500px) rotateX(15deg);
-  transform-style: preserve-3d;
 }
 
 @media (max-width: 480px) {
@@ -199,16 +202,29 @@ select {
 }
 
 .board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+/* Ячейки под плитками */
+.board-cells {
+  position: absolute;
+  inset: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 10px;
-  width: 100%;
-  aspect-ratio: 1;
-  position: relative;
+  pointer-events: none;
 }
 
-/* Плитки с обводкой и плавной анимацией */
+.cell-bg {
+  background: var(--cell-bg);
+  border-radius: 8px;
+  border: 2px solid var(--bg-primary);
+}
+
+/* Плитки */
 .tile {
   background: var(--tile-bg);
   border-radius: 8px;
@@ -224,7 +240,6 @@ select {
   height: calc(25% - 7.5px);
   -webkit-user-select: none;
   user-select: none;
-  /* Обводка и объем */
   border: 2px solid var(--bg-primary);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 -2px 0 rgba(0,0,0,0.05);
 }
@@ -322,6 +337,26 @@ select {
     font-size: 16px;
   }
 }
+
+/* Кнопка Shuffle */
+.shuffle-btn {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  margin-top: 15px;
+  font-size: 16px;
+  padding: 12px 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.shuffle-btn::before {
+  content: '🔀';
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.shuffle-btn:active {
+  transform: scale(0.95);
+}
 </style>
 </head>
 <body>
@@ -349,8 +384,11 @@ select {
   </div>
   
   <div class="board-container">
+    <div class="board-cells" id="board-cells"></div>
     <div class="board" id="board"></div>
   </div>
+  
+  <button class="shuffle-btn" id="shuffle-btn">Shuffle</button>
 </div>
 
 <div class="overlay" id="game-over">
@@ -373,9 +411,11 @@ select {
 <script>
 const BOARD_SIZE = 4;
 const board = document.getElementById('board');
+const boardCells = document.getElementById('board-cells');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
 const newGameBtn = document.getElementById('new-game');
+const shuffleBtn = document.getElementById('shuffle-btn');
 const themeSelect = document.getElementById('theme-select');
 const gameOverOverlay = document.getElementById('game-over');
 const victoryOverlay = document.getElementById('victory');
@@ -386,9 +426,19 @@ let grid = [];
 let score = 0;
 let best = parseInt(localStorage.getItem('bestScore') || '0', 10);
 let hasWon = false;
-let tileElements = {}; // Храним ссылки на DOM-элементы
+let tileElements = {};
 
 bestEl.textContent = best;
+
+// Создаем ячейки
+function createCells() {
+  boardCells.innerHTML = '';
+  for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell-bg';
+    boardCells.appendChild(cell);
+  }
+}
 
 // Инициализация пустой сетки
 function initGrid() {
@@ -408,7 +458,7 @@ function addTile() {
   if (emptyCells.length === 0) return false;
   
   const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  grid[row][col] = { value: Math.random() < 0.9 ? 2 : 4, id: Date.now() };
+  grid[row][col] = { value: Math.random() < 0.9 ? 2 : 4, id: Date.now() + Math.random() };
   return true;
 }
 
@@ -416,7 +466,7 @@ function addTile() {
 function getPosition(row, col) {
   const cellSize = board.offsetWidth / BOARD_SIZE;
   return {
-    x: col * cellSize + 5, // +5 для padding
+    x: col * cellSize + 5,
     y: row * cellSize + 5
   };
 }
@@ -433,7 +483,7 @@ function render() {
       const cell = grid[r][c];
       if (cell !== 0) {
         const tile = document.createElement('div');
-        tile.className = 'tile';
+        tile.className = 'tile new';
         tile.textContent = cell.value;
         tile.classList.add(`v${cell.value}`);
         
@@ -442,9 +492,63 @@ function render() {
         
         board.appendChild(tile);
         tileElements[`${r}-${c}`] = tile;
+        
+        // Убираем класс new после анимации
+        setTimeout(() => tile.classList.remove('new'), 200);
       }
     }
   }
+}
+
+// Функция Shuffle
+function shuffle() {
+  const tiles = [];
+  const positions = [];
+  
+  // Собираем все плитки и их позиции
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      if (grid[r][c] !== 0) {
+        tiles.push({ ...grid[r][c], oldR: r, oldC: c });
+        positions.push([r, c]);
+      }
+    }
+  }
+  
+  if (tiles.length < 2) return; // Нечего перемешивать
+  
+  // Перемешиваем позиции
+  for (let i = positions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [positions[i], positions[j]] = [positions[j], positions[i]];
+  }
+  
+  // Очищаем grid
+  initGrid();
+  
+  // Размещаем плитки на новых позициях с анимацией
+  tiles.forEach((tile, index) => {
+    const [newR, newC] = positions[index];
+    grid[newR][newC] = { value: tile.value, id: tile.id };
+    
+    // Анимация перемещения
+    if (tileElements[`${tile.oldR}-${tile.oldC}`]) {
+      const tileEl = tileElements[`${tile.oldR}-${tile.oldC}`];
+      const newPos = getPosition(newR, newC);
+      
+      // Плавно перемещаем плитку
+      setTimeout(() => {
+        tileEl.style.transform = `translate(${newPos.x}px, ${newPos.y}px)`;
+        tileEl.classList.add('v' + tile.value);
+        tileEl.textContent = tile.value;
+      }, index * 50); // Задержка для красивого эффекта
+    }
+  });
+  
+  // Перерисовываем после анимации
+  setTimeout(() => {
+    render();
+  }, tiles.length * 50 + 200);
 }
 
 // Сдвиг и слияние плиток
@@ -515,6 +619,61 @@ function move(direction) {
   return moved;
 }
 
+// Функция перемешивания с плавной анимацией
+function shuffleWithAnimation() {
+  const tiles = [];
+  const positions = [];
+  
+  // Собираем все плитки и их текущие позиции
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      if (grid[r][c] !== 0) {
+        tiles.push({ ...grid[r][c], oldR: r, oldC: c });
+        positions.push([r, c]);
+      }
+    }
+  }
+  
+  if (tiles.length < 2) return; // Нечего перемешивать
+  
+  // Перемешиваем позиции
+  for (let i = positions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [positions[i], positions[j]] = [positions[j], positions[i]];
+  }
+  
+  // Очищаем grid
+  const newGrid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
+  
+  // Получаем размер клетки для анимации
+  const cellSize = board.offsetWidth / BOARD_SIZE;
+  const gap = 10;
+  
+  // Анимация перемещения
+  tiles.forEach((tile, index) => {
+    const [newR, newC] = positions[index];
+    newGrid[newR][newC] = { value: tile.value, id: tile.id + Math.random() };
+    
+    // Находим DOM элемент и анимируем его перемещение
+    const tileEl = board.querySelector(`[data-id="${tile.id}"]`);
+    if (tileEl) {
+      const newX = newC * cellSize + 5;
+      const newY = newR * cellSize + 5;
+      
+      // Плавно перемещаем плитку
+      setTimeout(() => {
+        tileEl.style.transform = `translate(${newX}px, ${newY}px)`;
+      }, index * 30);
+    }
+  });
+  
+  // Обновляем grid после анимации
+  setTimeout(() => {
+    grid = newGrid;
+    render();
+  }, tiles.length * 30 + 150);
+}
+
 // Проверка возможности хода
 function canMove() {
   for (let r = 0; r < BOARD_SIZE; r++) {
@@ -525,13 +684,15 @@ function canMove() {
   
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE - 1; c++) {
-      if (grid[r][c].value === grid[r][c + 1].value) return true;
+      if (grid[r][c] !== 0 && grid[r][c + 1] !== 0 && 
+          grid[r][c].value === grid[r][c + 1].value) return true;
     }
   }
   
   for (let r = 0; r < BOARD_SIZE - 1; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
-      if (grid[r][c].value === grid[r + 1][c].value) return true;
+      if (grid[r][c] !== 0 && grid[r + 1][c] !== 0 && 
+          grid[r][c].value === grid[r + 1][c].value) return true;
     }
   }
   
@@ -557,7 +718,7 @@ function checkWin() {
 function handleMove(direction) {
   if (move(direction)) {
     addTile();
-    render();
+    setTimeout(() => render(), 60);
     updateScore();
     
     if (checkWin()) {
@@ -646,12 +807,14 @@ if (savedTheme !== 'beige') {
 
 // Кнопки
 newGameBtn.addEventListener('click', newGame);
+shuffleBtn.addEventListener('click', shuffleWithAnimation);
 document.getElementById('restart').addEventListener('click', newGame);
 document.getElementById('continue').addEventListener('click', () => {
   victoryOverlay.classList.remove('active');
 });
 
 // Инициализация игры
+createCells();
 newGame();
 </script>
 </body>
