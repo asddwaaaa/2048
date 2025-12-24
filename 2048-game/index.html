@@ -115,10 +115,18 @@ body {
   gap: 10px;
 }
 
+/* Объемный 3D заголовок с правильными тенями */
 h1 {
   font-size: 52px;
   font-weight: 700;
   color: var(--accent);
+  text-shadow: 
+    0 2px 0 rgba(0,0,0,0.25),
+    0 4px 0 rgba(0,0,0,0.15),
+    0 6px 0 rgba(0,0,0,0.1),
+    0 8px 8px var(--shadow);
+  transform: perspective(500px) rotateX(15deg);
+  transform-style: preserve-3d;
 }
 
 @media (max-width: 480px) {
@@ -200,6 +208,7 @@ select {
   position: relative;
 }
 
+/* Плитки с обводкой и плавной анимацией */
 .tile {
   background: var(--tile-bg);
   border-radius: 8px;
@@ -209,22 +218,34 @@ select {
   font-size: 32px;
   font-weight: 700;
   color: var(--text-dark);
-  transition: all 0.15s ease-in-out;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   width: calc(25% - 7.5px);
   height: calc(25% - 7.5px);
   -webkit-user-select: none;
   user-select: none;
+  /* Обводка и объем */
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 -2px 0 rgba(0,0,0,0.05);
 }
 
 .tile.merged {
   animation: pop 0.2s ease;
 }
 
+.tile.new {
+  animation: fadeIn 0.2s ease;
+}
+
 @keyframes pop {
   0% { transform: scale(0.8); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .tile.v2 { background: var(--tile-2); }
@@ -365,15 +386,17 @@ let grid = [];
 let score = 0;
 let best = parseInt(localStorage.getItem('bestScore') || '0', 10);
 let hasWon = false;
+let tileElements = {}; // Храним ссылки на DOM-элементы
 
 bestEl.textContent = best;
 
 // Инициализация пустой сетки
 function initGrid() {
   grid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
+  tileElements = {};
 }
 
-// Добавление новой плитки (2 или 4)
+// Добавление новой плитки
 function addTile() {
   const emptyCells = [];
   for (let r = 0; r < BOARD_SIZE; r++) {
@@ -385,27 +408,41 @@ function addTile() {
   if (emptyCells.length === 0) return false;
   
   const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  grid[row][col] = Math.random() < 0.9 ? 2 : 4;
+  grid[row][col] = { value: Math.random() < 0.9 ? 2 : 4, id: Date.now() };
   return true;
 }
 
-// Отрисовка игрового поля
+// Получение позиции в пикселях
+function getPosition(row, col) {
+  const cellSize = board.offsetWidth / BOARD_SIZE;
+  return {
+    x: col * cellSize + 5, // +5 для padding
+    y: row * cellSize + 5
+  };
+}
+
+// Рендеринг плиток
 function render() {
-  board.innerHTML = '';
+  // Удаляем старые плитки
+  const existingTiles = board.querySelectorAll('.tile');
+  existingTiles.forEach(tile => tile.remove());
+  
+  // Создаем новые плитки
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
-      const value = grid[r][c];
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      
-      if (value !== 0) {
-        tile.textContent = value;
-        tile.classList.add(`v${value}`);
+      const cell = grid[r][c];
+      if (cell !== 0) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.textContent = cell.value;
+        tile.classList.add(`v${cell.value}`);
+        
+        const pos = getPosition(r, c);
+        tile.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+        
+        board.appendChild(tile);
+        tileElements[`${r}-${c}`] = tile;
       }
-      
-      tile.style.left = `${c * 25}%`;
-      tile.style.top = `${r * 25}%`;
-      board.appendChild(tile);
     }
   }
 }
@@ -417,7 +454,7 @@ function move(direction) {
   
   if (direction === 'left' || direction === 'right') {
     for (let r = 0; r < BOARD_SIZE; r++) {
-      let row = grid[r].filter(val => val !== 0);
+      let row = grid[r].filter(cell => cell !== 0).map(cell => cell.value);
       if (direction === 'right') row.reverse();
       
       // Слияние
@@ -434,12 +471,18 @@ function move(direction) {
       while (row.length < BOARD_SIZE) row.push(0);
       if (direction === 'right') row.reverse();
       
-      if (JSON.stringify(grid[r]) !== JSON.stringify(row)) moved = true;
-      grid[r] = row;
+      // Обновляем grid
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        if (row[c] !== 0) {
+          grid[r][c] = { value: row[c], id: Date.now() + r * BOARD_SIZE + c };
+        } else {
+          grid[r][c] = 0;
+        }
+      }
     }
   } else {
     for (let c = 0; c < BOARD_SIZE; c++) {
-      let column = grid.map(row => row[c]).filter(val => val !== 0);
+      let column = grid.map(row => row[c]).filter(cell => cell !== 0).map(cell => cell.value);
       if (direction === 'down') column.reverse();
       
       // Слияние
@@ -456,10 +499,13 @@ function move(direction) {
       while (column.length < BOARD_SIZE) column.push(0);
       if (direction === 'down') column.reverse();
       
-      // Применение изменений
+      // Обновляем grid
       for (let r = 0; r < BOARD_SIZE; r++) {
-        if (grid[r][c] !== column[r]) moved = true;
-        grid[r][c] = column[r];
+        if (column[r] !== 0) {
+          grid[r][c] = { value: column[r], id: Date.now() + r * BOARD_SIZE + c };
+        } else {
+          grid[r][c] = 0;
+        }
       }
     }
   }
@@ -471,19 +517,21 @@ function move(direction) {
 
 // Проверка возможности хода
 function canMove() {
-  // Есть пустые клетки?
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       if (grid[r][c] === 0) return true;
     }
   }
   
-  // Есть доступные слияния?
   for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE - 1; c++) {
+      if (grid[r][c].value === grid[r][c + 1].value) return true;
+    }
+  }
+  
+  for (let r = 0; r < BOARD_SIZE - 1; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
-      const current = grid[r][c];
-      if (c < BOARD_SIZE - 1 && current === grid[r][c + 1]) return true;
-      if (r < BOARD_SIZE - 1 && current === grid[r + 1][c]) return true;
+      if (grid[r][c].value === grid[r + 1][c].value) return true;
     }
   }
   
@@ -494,7 +542,7 @@ function canMove() {
 function checkWin() {
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
-      if (grid[r][c] === 2048 && !hasWon) {
+      if (grid[r][c] !== 0 && grid[r][c].value === 2048 && !hasWon) {
         hasWon = true;
         victoryScoreEl.textContent = score;
         victoryOverlay.classList.add('active');
@@ -573,12 +621,12 @@ board.addEventListener('touchend', (e) => {
   const dx = touchEndX - touchStartX;
   const dy = touchEndY - touchStartY;
   
-  if (Math.abs(dx) > Math.abs(dy)) {
-    if (dx > 30) handleMove('right');
-    else if (dx < -30) handleMove('left');
-  } else {
-    if (dy > 30) handleMove('down');
-    else if (dy < -30) handleMove('up');
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+    if (dx > 0) handleMove('right');
+    else if (dx < 0) handleMove('left');
+  } else if (Math.abs(dy) > 30) {
+    if (dy > 0) handleMove('down');
+    else if (dy < 0) handleMove('up');
   }
 }, { passive: true });
 
