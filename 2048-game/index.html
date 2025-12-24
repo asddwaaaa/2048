@@ -225,13 +225,14 @@ select {
   font-size: 32px;
   font-weight: 700;
   color: var(--text-dark);
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-user-select: none;
   user-select: none;
   border: 2px solid var(--bg-primary);
   box-shadow: 0 4px 8px var(--shadow), inset 0 -2px 0 rgba(0,0,0,0.05);
-  grid-row: 1;
-  grid-column: 1;
+  position: absolute;
+  width: calc(25% - 7.5px);
+  height: calc(25% - 7.5px);
   z-index: 2;
 }
 
@@ -445,28 +446,61 @@ function addTile() {
   return true;
 }
 
-// Рендеринг плиток
-function render() {
-  // Удаляем старые плитки
-  const existingTiles = board.querySelectorAll('.tile');
-  existingTiles.forEach(tile => tile.remove());
+// Плавное перемещение плиток
+function animateTileMove(tileElement, newRow, newCol) {
+  if (!tileElement) return;
   
-  // Создаем новые плитки
+  // Устанавливаем новую позицию в grid
+  tileElement.style.gridRow = newRow + 1;
+  tileElement.style.gridColumn = newCol + 1;
+}
+
+// Рендеринг с анимацией
+function render() {
+  // Удаляем плитки которые исчезли (стёртые при слиянии)
+  const existingTiles = board.querySelectorAll('.tile');
+  existingTiles.forEach(tile => {
+    const tileId = parseInt(tile.dataset.id);
+    let exists = false;
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        if (grid[r][c] !== 0 && grid[r][c].id === tileId) {
+          exists = true;
+          break;
+        }
+      }
+      if (exists) break;
+    }
+    if (!exists) tile.remove();
+  });
+  
+  // Добавляем/обновляем плитки
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       const cell = grid[r][c];
       if (cell !== 0) {
-        const tile = document.createElement('div');
-        tile.className = 'tile new';
-        tile.textContent = cell.value;
-        tile.classList.add(`v${cell.value}`);
-        tile.dataset.id = cell.id;
-        tile.style.gridRow = r + 1;
-        tile.style.gridColumn = c + 1;
-        board.appendChild(tile);
+        let tile = board.querySelector(`[data-id="${cell.id}"]`);
         
-        // Убираем класс new после анимации
-        setTimeout(() => tile.classList.remove('new'), 200);
+        if (!tile) {
+          // Создаем новую плитку
+          tile = document.createElement('div');
+          tile.className = 'tile new';
+          tile.textContent = cell.value;
+          tile.classList.add(`v${cell.value}`);
+          tile.dataset.id = cell.id;
+          board.appendChild(tile);
+          
+          // Убираем класс new после анимации
+          setTimeout(() => tile.classList.remove('new'), 200);
+        } else {
+          // Обновляем существующую плитку
+          tile.textContent = cell.value;
+          tile.className = 'tile v' + cell.value + ' merged';
+          setTimeout(() => tile.classList.remove('merged'), 200);
+        }
+        
+        // Анимируем перемещение
+        animateTileMove(tile, r, c);
       }
     }
   }
@@ -534,7 +568,7 @@ function move(direction) {
   return moved;
 }
 
-// Функция перемешивания с плавной анимацией
+// Функция перемешивания с анимацией
 function shuffleWithAnimation() {
   const tiles = [];
   const positions = [];
@@ -566,7 +600,7 @@ function shuffleWithAnimation() {
     newGrid[newR][newC] = { value: tile.value, id: Date.now() + Math.random() };
   });
   
-  // Обновляем grid и перерисовываем
+  // Обновляем grid и перерисовываем с анимацией
   grid = newGrid;
   render();
 }
@@ -604,7 +638,6 @@ function checkWin() {
         hasWon = true;
         victoryScoreEl.textContent = score;
         victoryOverlay.classList.add('active');
-        saveBestScore();
         return true;
       }
     }
