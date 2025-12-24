@@ -8,7 +8,7 @@
 :root {
   --bg-primary: #f5e6d3;
   --bg-secondary: #e6d5c1;
-  --tile-bg: #e6d5c1;
+  --cell-bg: #d4c4b0;
   --tile-2: #f0e5d3;
   --tile-4: #e6d5c1;
   --tile-8: #d4c4b0;
@@ -24,14 +24,13 @@
   --text-light: #f5e6d3;
   --accent: #8b7355;
   --shadow: rgba(0,0,0,0.1);
-  --cell-bg: #d4c4b0;
 }
 
 /* Темы */
 .theme-dark {
   --bg-primary: #2d2d2d;
   --bg-secondary: #3a3a3a;
-  --tile-bg: #3a3a3a;
+  --cell-bg: #2a2a2a;
   --tile-2: #4a4a4a;
   --tile-4: #5a5a5a;
   --tile-8: #6a6a6a;
@@ -46,13 +45,12 @@
   --text-dark: #f0e6d3;
   --text-light: #2d2d2d;
   --accent: #d3bb9d;
-  --cell-bg: #2a2a2a;
 }
 
 .theme-ocean {
   --bg-primary: #e0f2f1;
   --bg-secondary: #b2ebf2;
-  --tile-bg: #b2ebf2;
+  --cell-bg: #a5d6d6;
   --tile-2: #80deea;
   --tile-4: #4dd0e1;
   --tile-8: #26c6da;
@@ -67,13 +65,12 @@
   --text-dark: #004d40;
   --text-light: #e0f2f1;
   --accent: #00838f;
-  --cell-bg: #a5d6d6;
 }
 
 .theme-forest {
   --bg-primary: #e8f5e8;
   --bg-secondary: #c8e6c9;
-  --tile-bg: #c8e6c9;
+  --cell-bg: #a5d6a7;
   --tile-2: #a5d6a7;
   --tile-4: #81c784;
   --tile-8: #66bb6a;
@@ -88,7 +85,6 @@
   --text-dark: #1b5e20;
   --text-light: #e8f5e8;
   --accent: #4caf50;
-  --cell-bg: #a5d6a7;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -195,33 +191,28 @@ select {
   padding: 10px;
   border-radius: 8px;
   box-shadow: 0 4px 16px var(--shadow);
-  position: relative;
   width: 100%;
   max-width: 460px;
-  margin: 0 auto;
+  margin: 0 auto 15px;
+  position: relative;
 }
 
 .board {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-}
-
-/* Ячейки под плитками */
-.board-cells {
-  position: absolute;
-  inset: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 10px;
-  pointer-events: none;
+  width: 100%;
+  aspect-ratio: 1;
+  position: relative;
 }
 
+/* Ячейки под плитками */
 .cell-bg {
   background: var(--cell-bg);
   border-radius: 8px;
   border: 2px solid var(--bg-primary);
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.05);
 }
 
 /* Плитки */
@@ -234,33 +225,33 @@ select {
   font-size: 32px;
   font-weight: 700;
   color: var(--text-dark);
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  position: absolute;
-  width: calc(25% - 7.5px);
-  height: calc(25% - 7.5px);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
   -webkit-user-select: none;
   user-select: none;
   border: 2px solid var(--bg-primary);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 -2px 0 rgba(0,0,0,0.05);
-}
-
-.tile.merged {
-  animation: pop 0.2s ease;
+  box-shadow: 0 4px 8px var(--shadow), inset 0 -2px 0 rgba(0,0,0,0.05);
+  grid-row: 1;
+  grid-column: 1;
+  z-index: 2;
 }
 
 .tile.new {
   animation: fadeIn 0.2s ease;
 }
 
-@keyframes pop {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+.tile.merged {
+  animation: pop 0.2s ease;
 }
 
 @keyframes fadeIn {
   0% { opacity: 0; transform: scale(0.5); }
   100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .tile.v2 { background: var(--tile-2); }
@@ -323,7 +314,23 @@ select {
   padding: 12px 30px;
 }
 
-/* Mobile optimizations */
+/* Кнопка Shuffle */
+.shuffle-btn {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  margin: 15px auto 0;
+  font-size: 16px;
+  padding: 12px 30px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.shuffle-btn::before {
+  content: '🔀';
+  margin-right: 8px;
+  font-size: 18px;
+}
+
 @media (max-width: 480px) {
   .tile {
     font-size: 24px;
@@ -336,26 +343,6 @@ select {
   .tile.v1024, .tile.v2048 {
     font-size: 16px;
   }
-}
-
-/* Кнопка Shuffle */
-.shuffle-btn {
-  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-  margin-top: 15px;
-  font-size: 16px;
-  padding: 12px 30px;
-  position: relative;
-  overflow: hidden;
-}
-
-.shuffle-btn::before {
-  content: '🔀';
-  margin-right: 8px;
-  font-size: 18px;
-}
-
-.shuffle-btn:active {
-  transform: scale(0.95);
 }
 </style>
 </head>
@@ -384,7 +371,6 @@ select {
   </div>
   
   <div class="board-container">
-    <div class="board-cells" id="board-cells"></div>
     <div class="board" id="board"></div>
   </div>
   
@@ -411,7 +397,6 @@ select {
 <script>
 const BOARD_SIZE = 4;
 const board = document.getElementById('board');
-const boardCells = document.getElementById('board-cells');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
 const newGameBtn = document.getElementById('new-game');
@@ -426,24 +411,22 @@ let grid = [];
 let score = 0;
 let best = parseInt(localStorage.getItem('bestScore') || '0', 10);
 let hasWon = false;
-let tileElements = {};
 
 bestEl.textContent = best;
-
-// Создаем ячейки
-function createCells() {
-  boardCells.innerHTML = '';
-  for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'cell-bg';
-    boardCells.appendChild(cell);
-  }
-}
 
 // Инициализация пустой сетки
 function initGrid() {
   grid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
-  tileElements = {};
+}
+
+// Создание ячеек
+function createCells() {
+  board.innerHTML = '';
+  for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell-bg';
+    board.appendChild(cell);
+  }
 }
 
 // Добавление новой плитки
@@ -458,17 +441,8 @@ function addTile() {
   if (emptyCells.length === 0) return false;
   
   const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  grid[row][col] = { value: Math.random() < 0.9 ? 2 : 4, id: Date.now() + Math.random() };
+  grid[row][col] = { value: Math.random() < 0.9 ? 2 : 4, id: Date.now() };
   return true;
-}
-
-// Получение позиции в пикселях
-function getPosition(row, col) {
-  const cellSize = board.offsetWidth / BOARD_SIZE;
-  return {
-    x: col * cellSize + 5,
-    y: row * cellSize + 5
-  };
 }
 
 // Рендеринг плиток
@@ -486,12 +460,10 @@ function render() {
         tile.className = 'tile new';
         tile.textContent = cell.value;
         tile.classList.add(`v${cell.value}`);
-        
-        const pos = getPosition(r, c);
-        tile.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-        
+        tile.dataset.id = cell.id;
+        tile.style.gridRow = r + 1;
+        tile.style.gridColumn = c + 1;
         board.appendChild(tile);
-        tileElements[`${r}-${c}`] = tile;
         
         // Убираем класс new после анимации
         setTimeout(() => tile.classList.remove('new'), 200);
@@ -500,72 +472,20 @@ function render() {
   }
 }
 
-// Функция Shuffle
-function shuffle() {
-  const tiles = [];
-  const positions = [];
-  
-  // Собираем все плитки и их позиции
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
-      if (grid[r][c] !== 0) {
-        tiles.push({ ...grid[r][c], oldR: r, oldC: c });
-        positions.push([r, c]);
-      }
-    }
-  }
-  
-  if (tiles.length < 2) return; // Нечего перемешивать
-  
-  // Перемешиваем позиции
-  for (let i = positions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [positions[i], positions[j]] = [positions[j], positions[i]];
-  }
-  
-  // Очищаем grid
-  initGrid();
-  
-  // Размещаем плитки на новых позициях с анимацией
-  tiles.forEach((tile, index) => {
-    const [newR, newC] = positions[index];
-    grid[newR][newC] = { value: tile.value, id: tile.id };
-    
-    // Анимация перемещения
-    if (tileElements[`${tile.oldR}-${tile.oldC}`]) {
-      const tileEl = tileElements[`${tile.oldR}-${tile.oldC}`];
-      const newPos = getPosition(newR, newC);
-      
-      // Плавно перемещаем плитку
-      setTimeout(() => {
-        tileEl.style.transform = `translate(${newPos.x}px, ${newPos.y}px)`;
-        tileEl.classList.add('v' + tile.value);
-        tileEl.textContent = tile.value;
-      }, index * 50); // Задержка для красивого эффекта
-    }
-  });
-  
-  // Перерисовываем после анимации
-  setTimeout(() => {
-    render();
-  }, tiles.length * 50 + 200);
-}
-
 // Сдвиг и слияние плиток
 function move(direction) {
   let moved = false;
-  const originalGrid = JSON.stringify(grid);
   
   if (direction === 'left' || direction === 'right') {
     for (let r = 0; r < BOARD_SIZE; r++) {
-      let row = grid[r].filter(cell => cell !== 0).map(cell => cell.value);
+      let row = grid[r].filter(cell => cell !== 0);
       if (direction === 'right') row.reverse();
       
       // Слияние
       for (let i = 0; i < row.length - 1; i++) {
-        if (row[i] === row[i + 1]) {
-          row[i] *= 2;
-          score += row[i];
+        if (row[i].value === row[i + 1].value) {
+          row[i].value *= 2;
+          score += row[i].value;
           row.splice(i + 1, 1);
           moved = true;
         }
@@ -576,24 +496,20 @@ function move(direction) {
       if (direction === 'right') row.reverse();
       
       // Обновляем grid
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        if (row[c] !== 0) {
-          grid[r][c] = { value: row[c], id: Date.now() + r * BOARD_SIZE + c };
-        } else {
-          grid[r][c] = 0;
-        }
-      }
+      grid[r] = row.map((cell, index) => 
+        cell !== 0 ? { value: cell.value, id: Date.now() + r * BOARD_SIZE + index } : 0
+      );
     }
   } else {
     for (let c = 0; c < BOARD_SIZE; c++) {
-      let column = grid.map(row => row[c]).filter(cell => cell !== 0).map(cell => cell.value);
+      let column = grid.map(row => row[c]).filter(cell => cell !== 0);
       if (direction === 'down') column.reverse();
       
       // Слияние
       for (let i = 0; i < column.length - 1; i++) {
-        if (column[i] === column[i + 1]) {
-          column[i] *= 2;
-          score += column[i];
+        if (column[i].value === column[i + 1].value) {
+          column[i].value *= 2;
+          score += column[i].value;
           column.splice(i + 1, 1);
           moved = true;
         }
@@ -604,17 +520,16 @@ function move(direction) {
       if (direction === 'down') column.reverse();
       
       // Обновляем grid
-      for (let r = 0; r < BOARD_SIZE; r++) {
-        if (column[r] !== 0) {
-          grid[r][c] = { value: column[r], id: Date.now() + r * BOARD_SIZE + c };
+      column.forEach((cell, index) => {
+        const r = index;
+        if (cell !== 0) {
+          grid[r][c] = { value: cell.value, id: Date.now() + r * BOARD_SIZE + c };
         } else {
           grid[r][c] = 0;
         }
-      }
+      });
     }
   }
-  
-  if (JSON.stringify(grid) !== originalGrid) moved = true;
   
   return moved;
 }
@@ -624,11 +539,11 @@ function shuffleWithAnimation() {
   const tiles = [];
   const positions = [];
   
-  // Собираем все плитки и их текущие позиции
+  // Собираем все плитки
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       if (grid[r][c] !== 0) {
-        tiles.push({ ...grid[r][c], oldR: r, oldC: c });
+        tiles.push({ ...grid[r][c] });
         positions.push([r, c]);
       }
     }
@@ -645,33 +560,15 @@ function shuffleWithAnimation() {
   // Очищаем grid
   const newGrid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
   
-  // Получаем размер клетки для анимации
-  const cellSize = board.offsetWidth / BOARD_SIZE;
-  const gap = 10;
-  
-  // Анимация перемещения
+  // Размещаем плитки на новых позициях
   tiles.forEach((tile, index) => {
     const [newR, newC] = positions[index];
-    newGrid[newR][newC] = { value: tile.value, id: tile.id + Math.random() };
-    
-    // Находим DOM элемент и анимируем его перемещение
-    const tileEl = board.querySelector(`[data-id="${tile.id}"]`);
-    if (tileEl) {
-      const newX = newC * cellSize + 5;
-      const newY = newR * cellSize + 5;
-      
-      // Плавно перемещаем плитку
-      setTimeout(() => {
-        tileEl.style.transform = `translate(${newX}px, ${newY}px)`;
-      }, index * 30);
-    }
+    newGrid[newR][newC] = { value: tile.value, id: Date.now() + Math.random() };
   });
   
-  // Обновляем grid после анимации
-  setTimeout(() => {
-    grid = newGrid;
-    render();
-  }, tiles.length * 30 + 150);
+  // Обновляем grid и перерисовываем
+  grid = newGrid;
+  render();
 }
 
 // Проверка возможности хода
@@ -707,6 +604,7 @@ function checkWin() {
         hasWon = true;
         victoryScoreEl.textContent = score;
         victoryOverlay.classList.add('active');
+        saveBestScore();
         return true;
       }
     }
@@ -716,18 +614,22 @@ function checkWin() {
 
 // Обработка хода
 function handleMove(direction) {
-  if (move(direction)) {
+  const moved = move(direction);
+  
+  if (moved) {
     addTile();
-    setTimeout(() => render(), 60);
-    updateScore();
-    
-    if (checkWin()) {
-      saveBestScore();
-    } else if (!canMove()) {
-      finalScoreEl.textContent = score;
-      gameOverOverlay.classList.add('active');
-      saveBestScore();
-    }
+    setTimeout(() => {
+      render();
+      updateScore();
+      
+      if (checkWin()) {
+        // Уже обработано в checkWin
+      } else if (!canMove()) {
+        finalScoreEl.textContent = score;
+        gameOverOverlay.classList.add('active');
+        saveBestScore();
+      }
+    }, 50);
   }
 }
 
