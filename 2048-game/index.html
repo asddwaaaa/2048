@@ -87,7 +87,11 @@
   --accent: #4caf50;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -99,6 +103,10 @@ body {
   min-height: 100vh;
   padding: 20px;
   transition: background 0.3s ease;
+  /* Отключаем скролл и pull-to-refresh на мобильных */
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 .container {
@@ -195,13 +203,16 @@ select {
   max-width: 460px;
   margin: 0 auto 15px;
   position: relative;
+  /* Критично для работы свайпов на мобильных */
+  touch-action: none;
 }
 
 .board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 10px;
+  /* Убираем gap - исправляет баг с половинками плиток на мобильных */
+  gap: 0;
   width: 100%;
   aspect-ratio: 1;
   position: relative;
@@ -230,9 +241,11 @@ select {
   user-select: none;
   border: 2px solid var(--bg-primary);
   box-shadow: 0 4px 8px var(--shadow), inset 0 -2px 0 rgba(0,0,0,0.05);
+  /* Переключаем на absolute positioning для мобильных */
   position: absolute;
   width: calc(25% - 7.5px);
   height: calc(25% - 7.5px);
+  margin: 3.75px;
   z-index: 2;
 }
 
@@ -332,6 +345,7 @@ select {
   font-size: 18px;
 }
 
+/* Мобильные оптимизации */
 @media (max-width: 480px) {
   .tile {
     font-size: 24px;
@@ -396,8 +410,10 @@ select {
 </div>
 
 <script>
+// ==================== КОНСТАНТЫ И ПЕРЕМЕННЫЕ ====================
 const BOARD_SIZE = 4;
 const board = document.getElementById('board');
+const BOARD_CONTAINER = document.querySelector('.board-container');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
 const newGameBtn = document.getElementById('new-game');
@@ -408,19 +424,26 @@ const victoryOverlay = document.getElementById('victory');
 const finalScoreEl = document.getElementById('final-score');
 const victoryScoreEl = document.getElementById('victory-score');
 
+// ==================== СОСТОЯНИЕ ИГРЫ ====================
 let grid = [];
 let score = 0;
 let best = parseInt(localStorage.getItem('bestScore') || '0', 10);
 let hasWon = false;
 
+// Отображаем лучший счёт
 bestEl.textContent = best;
 
-// Инициализация пустой сетки
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
+/**
+ * Создаёт пустую игровую сетку
+ */
 function initGrid() {
   grid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
 }
 
-// Создание ячеек
+/**
+ * Создаёт фоновые ячейки для игрового поля
+ */
 function createCells() {
   board.innerHTML = '';
   for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
@@ -430,7 +453,10 @@ function createCells() {
   }
 }
 
-// Добавление новой плитки
+/**
+ * Добавляет новую плитку (2 или 4) в случайную пустую клетку
+ * @returns {boolean} Удалось ли добавить плитку
+ */
 function addTile() {
   const emptyCells = [];
   for (let r = 0; r < BOARD_SIZE; r++) {
@@ -446,7 +472,12 @@ function addTile() {
   return true;
 }
 
-// Плавное перемещение плиток
+/**
+ * Анимирует перемещение плитки
+ * @param {HTMLElement} tileElement - DOM элемент плитки
+ * @param {number} newRow - Новая строка
+ * @param {number} newCol - Новый столбец
+ */
 function animateTileMove(tileElement, newRow, newCol) {
   if (!tileElement) return;
   
@@ -455,7 +486,10 @@ function animateTileMove(tileElement, newRow, newCol) {
   tileElement.style.gridColumn = newCol + 1;
 }
 
-// Рендеринг с анимацией
+// ==================== РЕНДЕРИНГ ====================
+/**
+ * Отрисовывает игровое поле с анимациями
+ */
 function render() {
   // Удаляем плитки которые исчезли (стёртые при слиянии)
   const existingTiles = board.querySelectorAll('.tile');
@@ -506,7 +540,12 @@ function render() {
   }
 }
 
-// Сдвиг и слияние плиток
+// ==================== ЛОГИКА ДВИЖЕНИЯ ====================
+/**
+ * Обрабатывает движение плиток в указанном направлении
+ * @param {string} direction - 'up', 'down', 'left', 'right'
+ * @returns {boolean} Был ли сделан ход
+ */
 function move(direction) {
   let moved = false;
   
@@ -568,7 +607,9 @@ function move(direction) {
   return moved;
 }
 
-// Функция перемешивания с анимацией
+/**
+ * Функция перемешивания плиток с анимацией
+ */
 function shuffleWithAnimation() {
   const tiles = [];
   const positions = [];
@@ -605,7 +646,11 @@ function shuffleWithAnimation() {
   render();
 }
 
-// Проверка возможности хода
+// ==================== ПРОВЕРКИ СОСТОЯНИЯ ====================
+/**
+ * Проверяет, возможен ли ход
+ * @returns {boolean} Возможен ли ход
+ */
 function canMove() {
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
@@ -630,7 +675,10 @@ function canMove() {
   return false;
 }
 
-// Проверка победы
+/**
+ * Проверяет условие победы (достижение 2048)
+ * @returns {boolean} Достигнута ли победа
+ */
 function checkWin() {
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
@@ -645,7 +693,11 @@ function checkWin() {
   return false;
 }
 
-// Обработка хода
+// ==================== УПРАВЛЕНИЕ ИГРОЙ ====================
+/**
+ * Обрабатывает ход игрока
+ * @param {string} direction - Направление движения
+ */
 function handleMove(direction) {
   const moved = move(direction);
   
@@ -666,12 +718,16 @@ function handleMove(direction) {
   }
 }
 
-// Обновление счёта
+/**
+ * Обновляет отображение текущего счёта
+ */
 function updateScore() {
   scoreEl.textContent = score;
 }
 
-// Сохранение лучшего результата
+/**
+ * Сохраняет лучший результат в localStorage
+ */
 function saveBestScore() {
   if (score > best) {
     best = score;
@@ -680,7 +736,9 @@ function saveBestScore() {
   }
 }
 
-// Новая игра
+/**
+ * Начинает новую игру, сбрасывая все состояния
+ */
 function newGame() {
   score = 0;
   hasWon = false;
@@ -693,7 +751,10 @@ function newGame() {
   render();
 }
 
-// Обработка клавиатуры
+// ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+/**
+ * Обработка ввода с клавиатуры (стрелки)
+ */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowUp') handleMove('up');
   if (e.key === 'ArrowDown') handleMove('down');
@@ -701,46 +762,63 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') handleMove('right');
 });
 
-// Обработка свайпов
+/**
+ * Обработка свайпов на сенсорных устройствах
+ * Перенесено на board-container для надёжности
+ */
 let touchStartX = 0;
 let touchStartY = 0;
+const SWIPE_THRESHOLD = 20; // Порог срабатывания свайпа (уменьшен для чувствительности)
 
-board.addEventListener('touchstart', (e) => {
+// Обработчик начала касания
+BOARD_CONTAINER.addEventListener('touchstart', (e) => {
+  // Предотвращаем стандартное поведение браузера (скролл, зум)
+  e.preventDefault();
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
-}, { passive: true });
+}, { passive: false });
 
-board.addEventListener('touchend', (e) => {
+// Обработчик окончания касания
+BOARD_CONTAINER.addEventListener('touchend', (e) => {
+  // Предотвращаем стандартное поведение браузера
+  e.preventDefault();
   const touchEndX = e.changedTouches[0].clientX;
   const touchEndY = e.changedTouches[0].clientY;
   
   const dx = touchEndX - touchStartX;
   const dy = touchEndY - touchStartY;
   
-  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-    if (dx > 0) handleMove('right');
-    else if (dx < 0) handleMove('left');
-  } else if (Math.abs(dy) > 30) {
-    if (dy > 0) handleMove('down');
-    else if (dy < 0) handleMove('up');
+  // Определяем направление свайпа
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // Горизонтальный свайп
+    if (dx > SWIPE_THRESHOLD) handleMove('right');
+    else if (dx < -SWIPE_THRESHOLD) handleMove('left');
+  } else {
+    // Вертикальный свайп
+    if (dy > SWIPE_THRESHOLD) handleMove('down');
+    else if (dy < -SWIPE_THRESHOLD) handleMove('up');
   }
-}, { passive: true });
+}, { passive: false });
 
-// Смена темы
+/**
+ * Обработка смены темы
+ */
 themeSelect.addEventListener('change', (e) => {
   const theme = e.target.value;
   document.body.className = theme === 'beige' ? '' : `theme-${theme}`;
   localStorage.setItem('theme', theme);
 });
 
-// Загрузка сохранённой темы
+/**
+ * Загрузка сохранённой темы при старте
+ */
 const savedTheme = localStorage.getItem('theme') || 'beige';
 if (savedTheme !== 'beige') {
   document.body.className = `theme-${savedTheme}`;
   themeSelect.value = savedTheme;
 }
 
-// Кнопки
+// ==================== ПРИВЯЗКА КНОПОК ====================
 newGameBtn.addEventListener('click', newGame);
 shuffleBtn.addEventListener('click', shuffleWithAnimation);
 document.getElementById('restart').addEventListener('click', newGame);
@@ -748,7 +826,8 @@ document.getElementById('continue').addEventListener('click', () => {
   victoryOverlay.classList.remove('active');
 });
 
-// Инициализация игры
+// ==================== ЗАПУСК ИГРЫ ====================
+// Создаём ячейки и начинаем новую игру при загрузке
 createCells();
 newGame();
 </script>
