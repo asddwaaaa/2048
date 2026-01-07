@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const gridContainer = document.querySelector('.grid-container');
     const tileContainer = document.getElementById('tile-container');
     const scoreDisplay = document.getElementById('score');
     const bestScoreDisplay = document.getElementById('best-score');
@@ -7,39 +6,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameMessage = document.getElementById('game-message');
     const messageText = gameMessage.querySelector('p');
     const restartButton = gameMessage.querySelector('.btn-restart');
+    const gameContainer = document.querySelector('.game-container');
 
     const GRID_SIZE = 4;
-    const CELL_GAP = 15;
+    const CELL_SIZE = 20; // in vmin
+    const CELL_GAP = 2; // in vmin
 
     let grid = [];
     let score = 0;
-    let bestScore = localStorage.getItem('2048-best-score') || 0;
+    let bestScore = 0;
     let isGameOver = false;
-
-    // --- UTILITY ---
-    function getCellSize() {
-        return gridContainer.querySelector('.grid-cell').offsetWidth;
-    }
-
-    function updateTilePositions() {
-        const cellSize = getCellSize();
-        const tiles = document.querySelectorAll('.tile');
-        tiles.forEach(tile => {
-            const x = parseInt(tile.dataset.x, 10);
-            const y = parseInt(tile.dataset.y, 10);
-            tile.style.width = `${cellSize}px`;
-            tile.style.height = `${cellSize}px`;
-            tile.style.transform = `translate(${x * (cellSize + CELL_GAP)}px, ${y * (cellSize + CELL_GAP)}px)`;
-        });
-    }
+    let win = false;
 
     // --- GAME SETUP ---
+
+    function createCellElements(gridElement) {
+        gridElement.innerHTML = '';
+        const cells = [];
+        for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+            const cell = document.createElement("div");
+            cell.classList.add("grid-cell");
+            cells.push(cell);
+            gridElement.appendChild(cell);
+        }
+        return cells;
+    }
+
     class Grid {
         constructor() {
             this.cells = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
         }
 
-        getEmptyCells() {
+        get emptyCells() {
             const emptyCells = [];
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
@@ -52,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         randomEmptyCell() {
-            const emptyCells = this.getEmptyCells();
+            const emptyCells = this.emptyCells;
             if (emptyCells.length === 0) return null;
             return emptyCells[Math.floor(Math.random() * emptyCells.length)];
         }
@@ -64,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.y = y;
             this.value = value;
             this.element = this.createElement();
-            this.update(x, y, this.value);
+            this.update(x, y, this.value, true);
             grid.cells[y][x] = this;
             tileContainer.appendChild(this.element);
         }
@@ -74,23 +72,30 @@ document.addEventListener('DOMContentLoaded', () => {
             tile.classList.add('tile');
             return tile;
         }
-        
-        update(x, y, value, isMerged = false) {
+
+        update(x, y, value, isNew = false) {
             this.x = x;
             this.y = y;
             this.value = value;
-
-            this.element.dataset.x = x;
-            this.element.dataset.y = y;
+            
             this.element.dataset.value = value;
             this.element.textContent = value;
             
-            this.element.classList.remove('tile-merged');
-            if (isMerged) {
-                this.element.classList.add('tile-merged');
-            }
+            const cellSize = gameContainer.querySelector('.grid-cell').offsetWidth;
+            const gap = parseFloat(getComputedStyle(gameContainer).gap) || 15;
             
-            updateTilePositions();
+            this.element.style.width = `${cellSize}px`;
+            this.element.style.height = `${cellSize}px`;
+            this.element.style.transform = `translate(${x * (cellSize + gap)}px, ${y * (cellSize + gap)}px)`;
+
+            this.element.classList.remove('tile-new', 'tile-merged');
+            if (isNew) {
+                this.element.classList.add('tile-new');
+            }
+        }
+        
+        merge() {
+            this.element.classList.add('tile-merged');
         }
 
         remove() {
@@ -98,14 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
             this.element.remove();
         }
     }
-    
+
     function startGame() {
         tileContainer.innerHTML = '';
         gameMessage.style.display = 'none';
         isGameOver = false;
+        win = false;
         grid = new Grid();
         score = 0;
         updateScore(0);
+        bestScore = localStorage.getItem('2048-best-score') || 0;
         updateBestScore();
 
         addRandomTile();
@@ -114,12 +121,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addRandomTile() {
+        if (grid.emptyCells.length === 0) return false;
         const cell = grid.randomEmptyCell();
         if (cell) {
-            const newTile = new Tile(cell.x, cell.y);
-            newTile.element.classList.add('tile-new');
+            new Tile(cell.x, cell.y);
+        }
+        return true;
+    }
+    
+    function updateTilePositions() {
+        const cellSize = gameContainer.querySelector('.grid-cell').offsetWidth;
+        const gap = parseFloat(getComputedStyle(gameContainer.querySelector('.grid-container')).gap) || 15;
+
+        for(let y=0; y<GRID_SIZE; y++) {
+            for(let x=0; x<GRID_SIZE; x++) {
+                const tile = grid.cells[y][x];
+                if(tile) {
+                    tile.element.style.width = `${cellSize}px`;
+                    tile.element.style.height = `${cellSize}px`;
+                    tile.element.style.transform = `translate(${x * (cellSize + gap)}px, ${y * (cellSize + gap)}px)`;
+                }
+            }
         }
     }
+
 
     // --- SCORE ---
     function updateScore(newPoints) {
@@ -137,188 +162,212 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- MOVEMENT LOGIC ---
-    function canMove(cells) {
+
+    function handleInput(e) {
+        if (isGameOver) return;
+        switch (e.key) {
+            case 'ArrowUp':
+                moveUp();
+                break;
+            case 'ArrowDown':
+                moveDown();
+                break;
+            case 'ArrowLeft':
+                moveLeft();
+                break;
+            case 'ArrowRight':
+                moveRight();
+                break;
+            default:
+                return;
+        }
+        e.preventDefault();
+        
+        if (!win && grid.cells.flat().some(t => t && t.value === 2048)) {
+            win = true;
+            endGame(true);
+        } else {
+             if (grid.emptyCells.length === 0 && !canMove()) {
+                endGame(false);
+            }
+        }
+    }
+    
+    function slideTiles(line) {
+        const newLine = line.filter(tile => tile !== null);
+        for(let i=0; i<newLine.length - 1; i++){
+            if(newLine[i].value === newLine[i+1].value){
+                const mergedValue = newLine[i].value * 2;
+                updateScore(mergedValue);
+                newLine[i].value = mergedValue;
+                newLine[i+1].remove();
+                newLine.splice(i+1, 1);
+                newLine[i].merge();
+            }
+        }
+        const emptyTiles = Array(GRID_SIZE - newLine.length).fill(null);
+        return newLine.concat(emptyTiles);
+    }
+    
+    function moveLeft(){
+        let moved = false;
+        for(let y=0; y<GRID_SIZE; y++){
+            const line = grid.cells[y];
+            const newLine = slideTiles(line);
+            for(let x=0; x<GRID_SIZE; x++){
+                 if (grid.cells[y][x]?.value !== newLine[x]?.value) moved = true;
+                grid.cells[y][x] = newLine[x];
+                if (grid.cells[y][x]) grid.cells[y][x].update(x, y, grid.cells[y][x].value);
+            }
+        }
+        if (moved) addRandomTile();
+    }
+    
+    function moveRight(){
+        let moved = false;
+        for(let y=0; y<GRID_SIZE; y++){
+            const line = grid.cells[y].slice().reverse();
+            const newLine = slideTiles(line).reverse();
+            for(let x=0; x<GRID_SIZE; x++){
+                 if (grid.cells[y][x]?.value !== newLine[x]?.value) moved = true;
+                grid.cells[y][x] = newLine[x];
+                if (grid.cells[y][x]) grid.cells[y][x].update(x, y, grid.cells[y][x].value);
+            }
+        }
+        if (moved) addRandomTile();
+    }
+
+    function moveUp(){
+        let moved = false;
+        for(let x=0; x<GRID_SIZE; x++){
+            const line = [];
+            for(let y=0; y<GRID_SIZE; y++) line.push(grid.cells[y][x]);
+            const newLine = slideTiles(line);
+            for(let y=0; y<GRID_SIZE; y++){
+                if (grid.cells[y][x]?.value !== newLine[y]?.value) moved = true;
+                grid.cells[y][x] = newLine[y];
+                if (grid.cells[y][x]) grid.cells[y][x].update(x, y, grid.cells[y][x].value);
+            }
+        }
+        if (moved) addRandomTile();
+    }
+    
+    function moveDown(){
+        let moved = false;
+        for(let x=0; x<GRID_SIZE; x++){
+            const line = [];
+            for(let y=0; y<GRID_SIZE; y++) line.push(grid.cells[y][x]);
+            const newLine = slideTiles(line.slice().reverse()).reverse();
+            for(let y=0; y<GRID_SIZE; y++){
+                if (grid.cells[y][x]?.value !== newLine[y]?.value) moved = true;
+                grid.cells[y][x] = newLine[y];
+                if (grid.cells[y][x]) grid.cells[y][x].update(x, y, grid.cells[y][x].value);
+            }
+        }
+        if (moved) addRandomTile();
+    }
+
+    function canMove() {
         for (let y = 0; y < GRID_SIZE; y++) {
             for (let x = 0; x < GRID_SIZE; x++) {
-                const tile = cells[y][x];
-                if (tile === null) return true; // Can move if there is an empty cell
-                // Check neighbors
-                if (x + 1 < GRID_SIZE && cells[y][x + 1] && cells[y][x + 1].value === tile.value) return true;
-                if (y + 1 < GRID_SIZE && cells[y + 1][x] && cells[y + 1][x].value === tile.value) return true;
+                const tile = grid.cells[y][x];
+                if (!tile) return true;
+                if (x + 1 < GRID_SIZE && grid.cells[y][x + 1] && grid.cells[y][x+1].value === tile.value) return true;
+                if (y + 1 < GRID_SIZE && grid.cells[y+1][x] && grid.cells[y+1][x].value === tile.value) return true;
             }
         }
         return false;
     }
 
-    function move(direction) {
-        if (isGameOver) return;
-
-        let moved = false;
-        const promises = [];
-
-        // 0: up, 1: right, 2: down, 3: left
-        const vector = { x: 0, y: 0 };
-        if (direction === 'up') vector.y = -1;
-        if (direction === 'down') vector.y = 1;
-        if (direction === 'left') vector.x = -1;
-        if (direction === 'right') vector.x = 1;
-
-        const traversals = buildTraversals(vector);
-        
-        traversals.x.forEach(x => {
-            traversals.y.forEach(y => {
-                const currentTile = grid.cells[y][x];
-                if (currentTile) {
-                    const positions = findFarthestPosition(x, y, vector);
-                    const nextTile = grid.cells[positions.next.y]?.[positions.next.x];
-
-                    if (nextTile && nextTile.value === currentTile.value && !nextTile.mergedFrom) {
-                        // Merge
-                        const mergedValue = currentTile.value * 2;
-                        
-                        grid.cells[positions.next.y][positions.next.x] = currentTile;
-                        grid.cells[y][x] = null;
-                        
-                        currentTile.update(positions.next.x, positions.next.y, mergedValue, true);
-                        nextTile.remove();
-
-                        currentTile.mergedFrom = true;
-                        
-                        updateScore(mergedValue);
-                        moved = true;
-                    } else {
-                        // Move
-                        if(positions.farthest.x !== x || positions.farthest.y !== y) {
-                            grid.cells[positions.farthest.y][positions.farthest.x] = currentTile;
-                            grid.cells[y][x] = null;
-                            currentTile.update(positions.farthest.x, positions.farthest.y, currentTile.value);
-                            moved = true;
-                        }
-                    }
-                }
-            });
-        });
-
-
-        // Clear merge flags
-        for (let r = 0; r < GRID_SIZE; r++) {
-            for (let c = 0; c < GRID_SIZE; c++) {
-                if (grid.cells[r][c]) {
-                    delete grid.cells[r][c].mergedFrom;
-                }
-            }
-        }
-        
-        if (moved) {
-            addRandomTile();
-            if (!canMove(grid.cells)) {
-                endGame(false); // Game over
-            }
-        }
-    }
-    
-    function buildTraversals(vector) {
-        const traversals = { x: [], y: [] };
-        for (let pos = 0; pos < GRID_SIZE; pos++) {
-            traversals.x.push(pos);
-            traversals.y.push(pos);
-        }
-        // Always traverse from the farthest cell in the chosen direction
-        if (vector.x === 1) traversals.x = traversals.x.reverse();
-        if (vector.y === 1) traversals.y = traversals.y.reverse();
-        
-        return traversals;
-    }
-
-    function findFarthestPosition(x, y, vector) {
-        let previous;
-        do {
-            previous = { x, y };
-            x += vector.x;
-            y += vector.y;
-        } while (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE && grid.cells[y][x] === null);
-
-        return {
-            farthest: previous,
-            next: { x, y } // position of the next tile or wall
-        };
-    }
-
 
     // --- GAME END ---
     function endGame(isWon) {
-        isGameOver = true;
-        gameMessage.style.display = 'flex';
-        gameMessage.classList.remove('game-won');
-
-        if (isWon) {
-            messageText.textContent = 'Вы победили!';
-            gameMessage.classList.add('game-won');
-        } else {
+        if (!win && isWon) {
+             messageText.textContent = 'Вы победили!';
+             gameMessage.classList.add('game-won');
+             gameMessage.style.display = 'flex';
+             restartButton.textContent = "Играть снова";
+             // Don't set isGameOver to true, allow continuing
+        } else if (!isWon) {
+            isGameOver = true;
             messageText.textContent = 'Игра окончена!';
+            gameMessage.classList.remove('game-won');
+            gameMessage.style.display = 'flex';
+            restartButton.textContent = "Попробовать снова";
         }
     }
     
-    // --- INPUT HANDLING ---
-    function handleKeyDown(e) {
-        switch (e.key) {
-            case 'ArrowUp':
-                e.preventDefault();
-                move('up');
-                break;
-            case 'ArrowDown':
-                e.preventDefault();
-                move('down');
-                break;
-            case 'ArrowLeft':
-                e.preventDefault();
-                move('left');
-                break;
-            case 'ArrowRight':
-                e.preventDefault();
-                move('right');
-                break;
-        }
+    function continueGame() {
+        win = true; // Acknowledge win
+        gameMessage.style.display = 'none';
     }
 
+    // --- INPUT HANDLING ---
     let touchStartX = 0;
     let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
-    
-    gridContainer.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
+
+    gameContainer.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
     }, { passive: true });
 
-    gridContainer.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        handleSwipe();
-    }, { passive: true });
-    
-    function handleSwipe() {
+    gameContainer.addEventListener('touchmove', e => {
+        e.preventDefault();
+    }, { passive: false });
+
+    gameContainer.addEventListener('touchend', e => {
+        if (isGameOver) return;
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        
         const dx = touchEndX - touchStartX;
         const dy = touchEndY - touchStartY;
+
         const absDx = Math.abs(dx);
         const absDy = Math.abs(dy);
-        const SWIPE_THRESHOLD = 50;
 
-        if (Math.max(absDx, absDy) > SWIPE_THRESHOLD) {
-            if (absDx > absDy) {
-                // Horizontal swipe
-                move(dx > 0 ? 'right' : 'left');
+        if (Math.max(absDx, absDy) > 30) { // Swipe threshold
+            const direction = absDx > absDy ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+            
+            switch (direction) {
+                case 'up': moveUp(); break;
+                case 'down': moveDown(); break;
+                case 'left': moveLeft(); break;
+                case 'right': moveRight(); break;
+            }
+
+            if (!win && grid.cells.flat().some(t => t && t.value === 2048)) {
+                win = true;
+                endGame(true);
             } else {
-                // Vertical swipe
-                move(dy > 0 ? 'down' : 'up');
+                 if (grid.emptyCells.length === 0 && !canMove()) {
+                    endGame(false);
+                }
             }
         }
-    }
+    });
 
     // --- EVENT LISTENERS ---
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleInput);
     newGameButton.addEventListener('click', startGame);
-    restartButton.addEventListener('click', startGame);
+    restartButton.addEventListener('click', () => {
+        if(isGameOver || win) {
+            startGame();
+        } else {
+            // This case should not be reachable if logic is correct
+             gameMessage.style.display = 'none';
+        }
+    });
+    
+    gameMessage.querySelector('.btn-restart').addEventListener('click', () => {
+        if (win && !isGameOver) {
+             continueGame(); // If game was won, this button means "continue"
+        } else {
+             startGame(); // If game was lost, this means "restart"
+        }
+    });
+
+
     window.addEventListener('resize', updateTilePositions);
 
 
