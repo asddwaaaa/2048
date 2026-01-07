@@ -1,265 +1,262 @@
-/* ==== БАЗОВЫЕ СТИЛИ ==== */
 :root {
-  --bg1: #cfeafc;
-  --bg2: #bfe0f8;
-  --accent: #6dbef9;
-  --gap: 12px;
+    --bg-color: #faf8ef;
+    --grid-bg-color: #bbada0;
+    --cell-bg-color: #cdc1b4;
+    --text-dark: #776e65;
+    --text-light: #f9f6f2;
+    --primary-accent: #8f7a66;
+
+    --tile-2: #eee4da;
+    --tile-4: #ede0c8;
+    --tile-8: #f2b179;
+    --tile-16: #f59563;
+    --tile-32: #f67c5f;
+    --tile-64: #f65e3b;
+    --tile-128: #edcf72;
+    --tile-256: #edcc61;
+    --tile-512: #edc850;
+    --tile-1024: #edc53f;
+    --tile-2048: #edc22e;
+    --tile-super: #3c3a32;
 }
 
 body {
-  font-family: "Segoe UI", sans-serif;
-  margin: 0;
-  background: linear-gradient(180deg, var(--bg1), #eaf6ff);
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  overflow: hidden;
+    font-family: 'Inter', 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overscroll-behavior: none;
 }
 
-/* ==== ФОН С РЫБАМИ И ПУЗЫРЯМИ ==== */
-.background-layer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 0;
+.container {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
 }
 
-.bubble {
-  position: absolute;
-  bottom: -100px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  animation: rise 10s infinite ease-in;
-}
-
-@keyframes rise {
-  0% {
-    transform: translateY(0) scale(1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(-120vh) scale(1.5);
-    opacity: 0;
-  }
-}
-
-/* Рыбы */
-.fish {
-  position: absolute;
-  width: 60px;
-  height: 30px;
-  background: orange;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  animation: swim 20s linear infinite;
-}
-
-.fish::after {
-  content: "";
-  position: absolute;
-  right: -15px;
-  top: 5px;
-  width: 20px;
-  height: 20px;
-  background: orange;
-  border-radius: 50%;
-  animation: tail 1s infinite alternate;
-}
-
-@keyframes swim {
-  0% {
-    left: -100px;
-    top: 20%;
-    transform: scaleX(1);
-  }
-  50% {
-    top: 40%;
-  }
-  100% {
-    left: 110%;
-    top: 30%;
-    transform: scaleX(1);
-  }
-}
-
-@keyframes tail {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(25deg);
-  }
-}
-
-/* ==== ОСНОВНОЕ ОКНО ==== */
-.app {
-  background: #fff;
-  padding: 16px;
-  border-radius: 14px;
-  width: 380px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 2;
-}
-
-/* ==== ЗАГОЛОВОК ==== */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
+
+.title-container {
+    display: flex;
+    flex-direction: column;
+}
+
 .title {
-  font-size: 28px;
-  font-weight: 700;
-}
-.subtitle {
-  font-size: 12px;
-  color: #555;
-}
-.counters {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.counter {
-  background: var(--accent);
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 12px;
+    font-size: 80px;
+    font-weight: 900;
+    margin: 0;
+    line-height: 1;
+    color: var(--text-dark);
 }
 
-/* ==== КНОПКИ ==== */
+.scores-container {
+    display: flex;
+    gap: 8px;
+}
+
+.score-box {
+    background-color: var(--grid-bg-color);
+    color: #eee4da;
+    padding: 10px 25px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.score-title {
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.score-value {
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+}
+
 .controls {
-  margin: 10px 0;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.button {
-  background: #f0f8ff;
-  border: 1px solid #d0e6f5;
-  padding: 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.button:hover {
-  background: #d9efff;
-}
-.mode-btn.active {
-  background: var(--accent);
-  color: #fff;
+    margin-top: 10px;
 }
 
-/* ==== ИГРОВОЕ ПОЛЕ ==== */
-.board-wrap {
-  background: #dff2fb;
-  padding: 10px;
-  border-radius: 12px;
-}
-#game-board {
-  position: relative;
-  width: 100%;
-  height: 360px;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: var(--gap);
-  height: 100%;
-}
-.cell {
-  background: #eef9ff;
-  border-radius: 8px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+.btn {
+    background-color: var(--primary-accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-/* ==== ПЛИТКИ ==== */
+.btn:hover {
+    background-color: #9f8b77;
+}
+
+.game-container {
+    position: relative;
+    touch-action: none;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 15px;
+    background-color: var(--grid-bg-color);
+    border-radius: 6px;
+    padding: 15px;
+    position: relative;
+    z-index: 1;
+    aspect-ratio: 1;
+}
+
+.grid-cell {
+    background-color: var(--cell-bg-color);
+    border-radius: 3px;
+}
+
+.tile-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 15px;
+}
+
 .tile {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 20px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-  color: #222;
-}
-.tile.v2 {
-  background: #c0e8ff;
-}
-.tile.v4 {
-  background: #9ad2ff;
-}
-.tile.v8 {
-  background: #6fc0f2;
-  color: #fff;
-}
-.tile.v16 {
-  background: #3aa6e6;
-  color: #fff;
-}
-.tile.v32 {
-  background: #2686bf;
-  color: #fff;
-}
-.tile.v64 {
-  background: #145375;
-  color: #fff;
-}
-.tile.v128 {
-  background: #ffb347;
-  color: #fff;
-}
-.tile.v256 {
-  background: #ff9933;
-  color: #fff;
-}
-.tile.v512 {
-  background: #ff6600;
-  color: #fff;
-}
-.tile.v1024 {
-  background: #ff3300;
-  color: #fff;
-}
-.tile.v2048 {
-  background: #ffd700;
-  color: #000;
-  animation: glow 1s infinite alternate;
+    position: absolute;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    transition: transform 100ms ease-in-out;
 }
 
-@keyframes glow {
-  from {
-    box-shadow: 0 0 10px #ffd700;
-  }
-  to {
-    box-shadow: 0 0 20px #ffae00;
-  }
+/* --- TILE STYLES --- */
+.tile[data-value="2"] { background: var(--tile-2); color: var(--text-dark); }
+.tile[data-value="4"] { background: var(--tile-4); color: var(--text-dark); }
+.tile[data-value="8"] { background: var(--tile-8); color: var(--text-light); }
+.tile[data-value="16"] { background: var(--tile-16); color: var(--text-light); }
+.tile[data-value="32"] { background: var(--tile-32); color: var(--text-light); }
+.tile[data-value="64"] { background: var(--tile-64); color: var(--text-light); }
+.tile[data-value="128"] { background: var(--tile-128); color: var(--text-light); }
+.tile[data-value="256"] { background: var(--tile-256); color: var(--text-light); }
+.tile[data-value="512"] { background: var(--tile-512); color: var(--text-light); }
+.tile[data-value="1024"] { background: var(--tile-1024); color: var(--text-light); font-size: 35px; }
+.tile[data-value="2048"] { background: var(--tile-2048); color: var(--text-light); font-size: 35px; }
+.tile[data-value="4096"],
+.tile[data-value="8192"] { background: var(--tile-super); color: var(--text-light); font-size: 30px; }
+
+/* Font sizes */
+.tile[data-value="2"], .tile[data-value="4"], .tile[data-value="8"] { font-size: 55px; }
+.tile[data-value="16"], .tile[data-value="32"], .tile[data-value="64"] { font-size: 50px; }
+.tile[data-value="128"], .tile[data-value="256"], .tile[data-value="512"] { font-size: 45px; }
+.tile[data-value="1024"], .tile[data-value="2048"], .tile[data-value="4096"], .tile[data-value="8192"] { font-size: 35px; }
+
+/* --- ANIMATIONS --- */
+.tile.tile-new {
+    animation: tile-new 200ms ease-in-out;
+}
+.tile.tile-merged {
+    animation: tile-merged 200ms ease-in-out;
 }
 
-/* ==== МОДАЛКИ ==== */
-.modal,
-.panel {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+@keyframes tile-new {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
 }
-.modal.active,
-.panel.active {
-  display: block;
+
+@keyframes tile-merged {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1.1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* --- GAME OVER MESSAGE --- */
+.game-message {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(238, 228, 218, 0.73);
+    z-index: 100;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    animation: fade-in 600ms;
+}
+
+.game-message p {
+    font-size: 60px;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin: 0 0 20px;
+}
+
+.game-message.game-won p {
+    color: var(--text-dark);
+}
+
+.game-message .btn-restart {
+    font-size: 20px;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 520px) {
+    .title {
+        font-size: 50px;
+    }
+    .score-box {
+        padding: 5px 15px;
+    }
+    .score-value {
+        font-size: 20px;
+    }
+    
+    .tile[data-value="2"], .tile[data-value="4"], .tile[data-value="8"] { font-size: 35px; }
+    .tile[data-value="16"], .tile[data-value="32"], .tile[data-value="64"] { font-size: 30px; }
+    .tile[data-value="128"], .tile[data-value="256"], .tile[data-value="512"] { font-size: 25px; }
+    .tile[data-value="1024"], .tile[data-value="2048"], .tile[data-value="4096"], .tile[data-value="8192"] { font-size: 20px; }
 }
