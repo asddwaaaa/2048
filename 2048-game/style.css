@@ -28,7 +28,7 @@ body {
     padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
     box-sizing: border-box;
     overscroll-behavior: none;
@@ -46,19 +46,26 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
 }
 
 .title-container {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .title {
     font-size: 80px;
     font-weight: 900;
     margin: 0;
-    line-height: 1;
+    line-height: 0.9;
     color: var(--text-dark);
+}
+
+.controls {
+    margin-top: 10px;
 }
 
 .scores-container {
@@ -72,22 +79,21 @@ body {
     padding: 10px 25px;
     border-radius: 3px;
     text-align: center;
+    min-width: 80px;
 }
 
 .score-title {
     font-size: 13px;
     font-weight: bold;
     text-transform: uppercase;
+    line-height: 1;
 }
 
 .score-value {
     font-size: 25px;
     font-weight: bold;
     color: white;
-}
-
-.controls {
-    margin-top: 10px;
+    line-height: 1.2;
 }
 
 .btn {
@@ -109,6 +115,9 @@ body {
 .game-container {
     position: relative;
     touch-action: none;
+    width: 100%;
+    height: auto;
+    margin-top: 20px;
 }
 
 .grid-container {
@@ -122,6 +131,7 @@ body {
     position: relative;
     z-index: 1;
     aspect-ratio: 1;
+    box-sizing: border-box;
 }
 
 .grid-cell {
@@ -131,15 +141,16 @@ body {
 
 .tile-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
     z-index: 2;
-    padding: 15px;
+    pointer-events: none;
 }
 
 .tile {
+    box-sizing: border-box;
     position: absolute;
     border-radius: 3px;
     display: flex;
@@ -172,13 +183,13 @@ body {
 
 /* --- ANIMATIONS --- */
 .tile.tile-new {
-    animation: tile-new 200ms ease-in-out;
+    animation: tile-new-pop 200ms ease-in-out;
 }
 .tile.tile-merged {
-    animation: tile-merged 200ms ease-in-out;
+    animation: tile-merged-pop 200ms ease-in-out;
 }
 
-@keyframes tile-new {
+@keyframes tile-new-pop {
     from {
         transform: scale(0);
     }
@@ -187,15 +198,12 @@ body {
     }
 }
 
-@keyframes tile-merged {
+@keyframes tile-merged-pop {
     from {
         transform: scale(0);
     }
-    to {
-        transform: scale(1.1);
-    }
     50% {
-        transform: scale(1.1);
+        transform: scale(1.2);
     }
     100% {
         transform: scale(1);
