@@ -32,6 +32,8 @@ body {
     min-height: 100vh;
     box-sizing: border-box;
     overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
@@ -80,6 +82,7 @@ body {
     border-radius: 3px;
     text-align: center;
     min-width: 80px;
+    position: relative;
 }
 
 .score-title {
@@ -100,7 +103,7 @@ body {
     background-color: var(--primary-accent);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-size: 16px;
     font-weight: bold;
     border-radius: 3px;
@@ -115,9 +118,11 @@ body {
 .game-container {
     position: relative;
     touch-action: none;
-    width: 100%;
-    height: auto;
+    background-color: var(--grid-bg-color);
+    border-radius: 6px;
+    padding: 15px;
     margin-top: 20px;
+    box-sizing: border-box;
 }
 
 .grid-container {
@@ -125,13 +130,9 @@ body {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: 15px;
-    background-color: var(--grid-bg-color);
-    border-radius: 6px;
-    padding: 15px;
     position: relative;
     z-index: 1;
     aspect-ratio: 1;
-    box-sizing: border-box;
 }
 
 .grid-cell {
@@ -141,10 +142,10 @@ body {
 
 .tile-container {
     position: absolute;
-    top: 15px;
-    left: 15px;
-    right: 15px;
-    bottom: 15px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 2;
     pointer-events: none;
 }
@@ -152,11 +153,11 @@ body {
 .tile {
     box-sizing: border-box;
     position: absolute;
-    border-radius: 3px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
+    border-radius: 3px;
     transition: transform 100ms ease-in-out;
 }
 
@@ -170,23 +171,28 @@ body {
 .tile[data-value="128"] { background: var(--tile-128); color: var(--text-light); }
 .tile[data-value="256"] { background: var(--tile-256); color: var(--text-light); }
 .tile[data-value="512"] { background: var(--tile-512); color: var(--text-light); }
-.tile[data-value="1024"] { background: var(--tile-1024); color: var(--text-light); font-size: 35px; }
-.tile[data-value="2048"] { background: var(--tile-2048); color: var(--text-light); font-size: 35px; }
+.tile[data-value="1024"] { background: var(--tile-1024); color: var(--text-light); }
+.tile[data-value="2048"] { background: var(--tile-2048); color: var(--text-light); }
 .tile[data-value="4096"],
-.tile[data-value="8192"] { background: var(--tile-super); color: var(--text-light); font-size: 30px; }
+.tile[data-value="8192"] { background: var(--tile-super); color: var(--text-light); }
 
 /* Font sizes */
 .tile[data-value="2"], .tile[data-value="4"], .tile[data-value="8"] { font-size: 55px; }
 .tile[data-value="16"], .tile[data-value="32"], .tile[data-value="64"] { font-size: 50px; }
 .tile[data-value="128"], .tile[data-value="256"], .tile[data-value="512"] { font-size: 45px; }
-.tile[data-value="1024"], .tile[data-value="2048"], .tile[data-value="4096"], .tile[data-value="8192"] { font-size: 35px; }
+.tile[data-value="1024"] { font-size: 35px; }
+.tile[data-value="2048"] { font-size: 35px; }
+.tile[data-value="4096"] { font-size: 30px; }
+.tile[data-value="8192"] { font-size: 30px; }
 
 /* --- ANIMATIONS --- */
 .tile.tile-new {
-    animation: tile-new-pop 200ms ease-in-out;
+    animation: tile-new-pop 200ms ease-out;
+    animation-delay: 100ms;
 }
 .tile.tile-merged {
-    animation: tile-merged-pop 200ms ease-in-out;
+    animation: tile-merged-pop 200ms ease-out;
+    z-index: 20;
 }
 
 @keyframes tile-new-pop {
@@ -205,7 +211,7 @@ body {
     50% {
         transform: scale(1.2);
     }
-    100% {
+    to {
         transform: scale(1);
     }
 }
@@ -253,6 +259,9 @@ body {
 }
 
 @media (max-width: 520px) {
+    body {
+        padding: 10px;
+    }
     .title {
         font-size: 50px;
     }
@@ -267,4 +276,8 @@ body {
     .tile[data-value="16"], .tile[data-value="32"], .tile[data-value="64"] { font-size: 30px; }
     .tile[data-value="128"], .tile[data-value="256"], .tile[data-value="512"] { font-size: 25px; }
     .tile[data-value="1024"], .tile[data-value="2048"], .tile[data-value="4096"], .tile[data-value="8192"] { font-size: 20px; }
+
+    .game-message p {
+        font-size: 40px;
+    }
 }
