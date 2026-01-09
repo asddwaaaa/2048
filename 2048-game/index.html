@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>2048</title>
 <style>
 :root {
-  /* Оригинальная цветовая палитра 2048 */
+  /* Оригинальные цвета 2048 */
   --bg-primary: #faf8ef;
   --bg-secondary: #bbada0;
+  --cell-bg: rgba(238, 228, 218, 0.35);
   --tile-2: #eee4da;
   --tile-4: #ede0c8;
   --tile-8: #f2b179;
@@ -22,16 +23,16 @@
   --tile-2048: #edc22e;
   --text-dark: #776e65;
   --text-light: #f9f6f2;
-  --accent-new: #ff6f61;
+  --accent-new: #8f7a66;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+
+html, body {
+  overflow: hidden;
+  height: 100%;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 body {
@@ -42,9 +43,6 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  touch-action: none;
-  overflow: hidden;
-  overscroll-behavior: none;
 }
 
 .container {
@@ -63,8 +61,8 @@ body {
 h1 {
   font-size: 80px;
   font-weight: bold;
-  line-height: 1;
-  margin: 0;
+  line-height: 0.7;
+  color: var(--text-dark);
 }
 
 .scores-container {
@@ -78,7 +76,6 @@ h1 {
   border-radius: 3px;
   color: white;
   text-align: center;
-  position: relative;
 }
 
 .score-label {
@@ -103,6 +100,8 @@ h1 {
   font-weight: bold;
   cursor: pointer;
   margin-top: 15px;
+  display: block;
+  width: 100%;
 }
 
 .new-game-btn:active {
@@ -129,6 +128,13 @@ h1 {
   position: relative;
 }
 
+/* Фоновые ячейки */
+.cell-bg {
+  background: var(--cell-bg);
+  border-radius: 3px;
+  z-index: 1;
+}
+
 /* Плитки */
 .tile {
   position: absolute;
@@ -145,7 +151,6 @@ h1 {
   color: var(--text-dark);
   transition: all 0.15s ease-in-out;
   z-index: 2;
-  box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0);
 }
 
 .tile.v2 { background: var(--tile-2); }
@@ -221,12 +226,6 @@ h1 {
   cursor: pointer;
 }
 
-/* Ячейки фона */
-.cell-bg {
-  background: rgba(238, 228, 218, 0.35);
-  border-radius: 3px;
-}
-
 /* Мобильные оптимизации */
 @media (max-width: 480px) {
   h1 { font-size: 50px; }
@@ -254,9 +253,7 @@ h1 {
   <button class="new-game-btn" id="new-game">Новая игра</button>
   
   <div class="board-container">
-    <div class="board" id="board">
-      <!-- Фоновые ячейки добавляются через JS -->
-    </div>
+    <div class="board" id="board"></div>
   </div>
 </div>
 
@@ -295,7 +292,6 @@ let hasWon = false;
 
 bestEl.textContent = best;
 
-// Создаём фоновые ячейки
 function createCells() {
   board.innerHTML = '';
   for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
@@ -305,7 +301,6 @@ function createCells() {
   }
 }
 
-// Инициализация
 function initGrid() {
   grid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
 }
@@ -339,6 +334,7 @@ function render() {
         tile.textContent = cell.value;
         tile.classList.add(`v${cell.value}`);
         tile.dataset.id = cell.id;
+        // Позиционирование в пикселях для плавной анимации
         tile.style.left = `${c * 25 + 7.5}px`;
         tile.style.top = `${r * 25 + 7.5}px`;
         board.appendChild(tile);
@@ -471,11 +467,6 @@ function handleMove(direction) {
 
 function updateScore() {
   scoreEl.textContent = score;
-  if (score > best) {
-    best = score;
-    bestEl.textContent = best;
-    localStorage.setItem('bestScore', best);
-  }
 }
 
 function saveBestScore() {
