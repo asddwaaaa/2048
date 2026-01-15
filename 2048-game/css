@@ -1,1 +1,121 @@
+/* Сброс */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+body {
+  font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+  background: #faf8ef;
+  color: #776e65;
+  text-align: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0;
+  display: block;
+  float: left;
+}
+
+.scores-container {
+  display: flex;
+  gap: 10px;
+}
+
+.score-container, .best-container {
+  background: #bbada0;
+  padding: 10px 15px;
+  border-radius: 3px;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.score-container span, .best-container span {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.retry-button {
+  background: #8f7a66;
+  border: none;
+  border-radius: 3px;
+  color: #f9f6f2;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  display: block;
+  margin: 10px auto;
+  outline: none;
+}
+
+.game-container {
+  position: relative;
+  background: #bbada0;
+  padding: 15px;
+  border-radius: 6px;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 15px;
+  height: 400px;
+}
+
+.tile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  font-weight: bold;
+  border-radius: 3px;
+  background: #cdc1b4;
+  transition: all 0.12s ease-in-out;
+  user-select: none;
+}
+
+/* Цвета как на play2048.co */
+.tile-2 { background: #eee4da; }
+.tile-4 { background: #ede0c8; }
+.tile-8 { background: #f2b179; color: #f9f6f2; }
+.tile-16 { background: #f59563; color: #f9f6f2; }
+.tile-32 { background: #f67c5f; color: #f9f6f2; }
+.tile-64 { background: #f65e3b; color: #f9f6f2; }
+.tile-128 { background: #edcf72; color: #f9f6f2; font-size: 25px; }
+.tile-256 { background: #edcc61; color: #f9f6f2; font-size: 25px; }
+.tile-512 { background: #edc850; color: #f9f6f2; font-size: 25px; }
+.tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 20px; }
+.tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 20px; }
+
+/* Анимация появления */
+.tile.new {
+  animation: appear 0.2s ease 0.1s both;
+}
+
+@keyframes appear {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
