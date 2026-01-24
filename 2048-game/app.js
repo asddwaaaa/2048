@@ -1,23 +1,36 @@
-import os
-from typing import List
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from fastapi import FastAPI
+from settings import settings
+
+app = FastAPI()
 
 
-class Settings(BaseSettings):
-    BOT_TOKEN: str
-    ADMIN_IDS: List[int]
-    DB_URL: str = 'sqlite+aiosqlite:///data/db.sqlite3'
-    BASE_SITE: str
+@app.get("/")
+async def root():
+    return {
+        "status": "ok",
+        "message": "Service is running"
+    }
 
-    model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+
+@app.post("/webhook")
+async def webhook(data: dict):
+    # сюда придёт webhook (Telegram / другой сервис)
+    print("Webhook data:", data)
+    return {"status": "received"}
+
+
+@app.get("/health")
+async def healthcheck():
+    return {"health": "ok"}
+
+
+# Для локального запуска
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
     )
-
-    def get_webhook_url(self) -> str:
-        """Возвращает URL вебхука с кодированием специальных символов."""
-        return f"{self.BASE_SITE}/webhook"
-
-      
-# Получаем параметры для загрузки переменных среды
-settings = Settings()
-database_url = settings.DB_URL
