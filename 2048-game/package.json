@@ -2,9 +2,10 @@
   "name": "2048",
   "version": "1.0.0",
   "scripts": {
-    "start": "node app.js"
+   "start": "ts-node app.ts"
   },
   "dependencies": {
     "express": "^4.17.1"
   }
+
 }
