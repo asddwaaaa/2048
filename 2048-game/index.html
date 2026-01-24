@@ -1,38 +1,59 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2048</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>2048 — Простая игра</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1 class="title">2048</h1>
-      <div class="scores-container">
-        <div class="score-container">
-          Счёт<br><span id="score">0</span>
-        </div>
-        <div class="best-container">
-          Рекорд<br><span id="best">0</span>
-        </div>
+<div class="container">
+  <div class="header">
+    <h1>2048</h1>
+    <div class="score-container">
+      <div class="score-box">
+        Счёт: <span class="score-value" id="score">0</span>
       </div>
-    </header>
-
-    <button id="retry-button" class="retry-button">Новая игра</button>
-
-    <div class="game-container">
-      <div class="grid" id="grid"></div>
-    </div>
-
-    <div class="game-message" id="gameMessage" style="display:none;">
-      <p id="messageText"></p>
-      <button id="keepPlayingButton">Продолжить</button>
+      <div class="score-box">
+        Лучший: <span class="score-value" id="best">0</span>
+      </div>
     </div>
   </div>
+  
+  <div class="controls">
+    <button id="new-game">Новая игра</button>
+    <select id="theme-select">
+      <option value="beige">Бежевый</option>
+      <option value="dark">Тёмный</option>
+      <option value="ocean">Океан</option>
+      <option value="forest">Лес</option>
+    </select>
+  </div>
+  
+  <div class="board-container" id="board-container">
+    <div class="grid-background"></div>
+    <div class="tile-container" id="tile-container"></div>
+  </div>
+  
+</div>
 
-  <script src="script.js"></script>
+<div class="overlay" id="game-over-overlay">
+  <div class="modal">
+    <h2 id="game-over-title">Игра окончена!</h2>
+    <p>Финальный счёт: <span id="final-score">0</span></p>
+    <button id="restart-btn">Играть снова</button>
+  </div>
+</div>
+
+<div class="overlay" id="victory-overlay">
+  <div class="modal">
+    <h2>🎉 Победа! 🎉</h2>
+    <p>Вы собрали 2048!</p>
+    <p>Счёт: <span id="victory-score">0</span></p>
+    <button id="continue-btn">Продолжить</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
