@@ -1,59 +1,328 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>2048 — Простая игра</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="2048 - A modern puzzle game with smooth animations and exciting gameplay modes" />
+  <meta name="theme-color" content="#667eea" />
+  <title>2048 - Modern Edition</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>2048</h1>
-    <div class="score-container">
-      <div class="score-box">
-        Счёт: <span class="score-value" id="score">0</span>
+  <div class="app">
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="bg-gradient"></div>
+      <div class="bg-particles" id="particles"></div>
+    </div>
+
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <h1>2048</h1>
+          <span class="edition-badge">Modern Edition</span>
+        </div>
+        <div class="score-panel">
+          <div class="score-card current-score">
+            <span class="score-label">Score</span>
+            <span class="score-value" id="score">0</span>
+            <div class="score-addition" id="score-addition"></div>
+          </div>
+          <div class="score-card best-score">
+            <span class="score-label">Best</span>
+            <span class="score-value" id="best">0</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Controls -->
+      <div class="controls">
+        <div class="control-group left">
+          <button class="btn btn-icon" id="undo-btn" title="Undo (Ctrl+Z)" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 10h10a5 5 0 0 1 5 5v2M3 10l4-4M3 10l4 4"/>
+            </svg>
+          </button>
+          <button class="btn btn-primary" id="new-game">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            New Game
+          </button>
+        </div>
+        <div class="control-group right">
+          <button class="btn btn-icon" id="stats-btn" title="Statistics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </button>
+          <button class="btn btn-icon" id="settings-btn" title="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      <div class="score-box">
-        Лучший: <span class="score-value" id="best">0</span>
+
+      <!-- Game Mode Indicator -->
+      <div class="game-mode-bar">
+        <span class="mode-label" id="mode-label">Classic Mode</span>
+        <div class="mode-info" id="mode-info"></div>
+      </div>
+
+      <!-- Game Board -->
+      <div class="board-wrapper">
+        <div class="board-container" id="board-container">
+          <div class="grid-background" id="grid-background"></div>
+          <div class="tile-container" id="tile-container"></div>
+        </div>
+
+        <!-- Swipe Hint -->
+        <div class="swipe-hint" id="swipe-hint">
+          <span>Swipe or use arrow keys to play</span>
+        </div>
+      </div>
+
+      <!-- Move Counter -->
+      <div class="game-info">
+        <div class="info-item">
+          <span class="info-label">Moves</span>
+          <span class="info-value" id="moves">0</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Time</span>
+          <span class="info-value" id="timer">00:00</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Highest Tile</span>
+          <span class="info-value" id="highest-tile">0</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>Join tiles to reach <strong>2048</strong></p>
+        <p class="hint">Use arrow keys, WASD, or swipe to move</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div class="modal-overlay" id="game-over-overlay">
+    <div class="modal game-over-modal">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
+          <line x1="9" y1="9" x2="9.01" y2="9"/>
+          <line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </div>
+      <h2>Game Over!</h2>
+      <div class="modal-stats">
+        <div class="stat">
+          <span class="stat-label">Final Score</span>
+          <span class="stat-value" id="final-score">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Moves</span>
+          <span class="stat-value" id="final-moves">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Time</span>
+          <span class="stat-value" id="final-time">00:00</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-large" id="restart-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Try Again
+        </button>
       </div>
     </div>
   </div>
-  
-  <div class="controls">
-    <button id="new-game">Новая игра</button>
-    <select id="theme-select">
-      <option value="beige">Бежевый</option>
-      <option value="dark">Тёмный</option>
-      <option value="ocean">Океан</option>
-      <option value="forest">Лес</option>
-    </select>
-  </div>
-  
-  <div class="board-container" id="board-container">
-    <div class="grid-background"></div>
-    <div class="tile-container" id="tile-container"></div>
-  </div>
-  
-</div>
 
-<div class="overlay" id="game-over-overlay">
-  <div class="modal">
-    <h2 id="game-over-title">Игра окончена!</h2>
-    <p>Финальный счёт: <span id="final-score">0</span></p>
-    <button id="restart-btn">Играть снова</button>
+  <!-- Victory Modal -->
+  <div class="modal-overlay" id="victory-overlay">
+    <div class="modal victory-modal">
+      <div class="confetti-container" id="confetti"></div>
+      <div class="modal-icon victory-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <h2>Victory!</h2>
+      <p class="victory-message">You reached 2048!</p>
+      <div class="modal-stats">
+        <div class="stat">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="victory-score">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Moves</span>
+          <span class="stat-value" id="victory-moves">0</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="continue-btn">Continue Playing</button>
+        <button class="btn btn-primary" id="victory-restart-btn">New Game</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="overlay" id="victory-overlay">
-  <div class="modal">
-    <h2>🎉 Победа! 🎉</h2>
-    <p>Вы собрали 2048!</p>
-    <p>Счёт: <span id="victory-score">0</span></p>
-    <button id="continue-btn">Продолжить</button>
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-overlay">
+    <div class="modal settings-modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="btn btn-icon close-btn" id="close-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="settings-content">
+        <div class="setting-group">
+          <label class="setting-label">Theme</label>
+          <div class="theme-options">
+            <button class="theme-btn active" data-theme="gradient" title="Gradient">
+              <span class="theme-preview gradient"></span>
+            </button>
+            <button class="theme-btn" data-theme="dark" title="Dark">
+              <span class="theme-preview dark"></span>
+            </button>
+            <button class="theme-btn" data-theme="light" title="Light">
+              <span class="theme-preview light"></span>
+            </button>
+            <button class="theme-btn" data-theme="ocean" title="Ocean">
+              <span class="theme-preview ocean"></span>
+            </button>
+            <button class="theme-btn" data-theme="sunset" title="Sunset">
+              <span class="theme-preview sunset"></span>
+            </button>
+            <button class="theme-btn" data-theme="forest" title="Forest">
+              <span class="theme-preview forest"></span>
+            </button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">Game Mode</label>
+          <div class="mode-options">
+            <button class="mode-btn active" data-mode="classic">
+              <span class="mode-icon">4x4</span>
+              <span class="mode-name">Classic</span>
+            </button>
+            <button class="mode-btn" data-mode="5x5">
+              <span class="mode-icon">5x5</span>
+              <span class="mode-name">Extended</span>
+            </button>
+            <button class="mode-btn" data-mode="speed">
+              <span class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+              </span>
+              <span class="mode-name">Speed</span>
+            </button>
+            <button class="mode-btn" data-mode="zen">
+              <span class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                  <line x1="9" y1="9" x2="9.01" y2="9"/>
+                  <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+              </span>
+              <span class="mode-name">Zen</span>
+            </button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <div class="setting-row">
+            <label class="setting-label">Sound Effects</label>
+            <button class="toggle-btn active" id="sound-toggle">
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <div class="setting-row">
+            <label class="setting-label">Animations</label>
+            <button class="toggle-btn active" id="animation-toggle">
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <div class="setting-row">
+            <label class="setting-label">Show Timer</label>
+            <button class="toggle-btn active" id="timer-toggle">
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script src="script.js"></script>
+  <!-- Statistics Modal -->
+  <div class="modal-overlay" id="stats-overlay">
+    <div class="modal stats-modal">
+      <div class="modal-header">
+        <h2>Statistics</h2>
+        <button class="btn btn-icon close-btn" id="close-stats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="stats-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-number" id="stat-games">0</span>
+            <span class="stat-desc">Games Played</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-wins">0</span>
+            <span class="stat-desc">Victories</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-best">0</span>
+            <span class="stat-desc">Best Score</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-highest">0</span>
+            <span class="stat-desc">Highest Tile</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-moves">0</span>
+            <span class="stat-desc">Total Moves</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-time">0h</span>
+            <span class="stat-desc">Time Played</span>
+          </div>
+        </div>
+        <div class="tile-achievements">
+          <h3>Tiles Achieved</h3>
+          <div class="achievement-tiles" id="achievement-tiles"></div>
+        </div>
+        <button class="btn btn-secondary btn-small" id="reset-stats">Reset Statistics</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
