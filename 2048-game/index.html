@@ -3,55 +3,76 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>2048 — Простая игра</title>
+<title>2048</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <h1>2048</h1>
-    <div class="score-container">
-      <div class="score-box">
-        Счёт: <span class="score-value" id="score">0</span>
+  <div class="heading">
+    <h1 class="title">2048</h1>
+    <div class="scores-container">
+      <div class="score-container">
+        <div class="score-label">СЧЁТ</div>
+        <div class="score-value" id="score">0</div>
+        <div class="score-addition" id="score-addition"></div>
       </div>
-      <div class="score-box">
-        Лучший: <span class="score-value" id="best">0</span>
+      <div class="score-container best-container">
+        <div class="score-label">РЕКОРД</div>
+        <div class="score-value" id="best">0</div>
       </div>
     </div>
   </div>
-  
-  <div class="controls">
-    <button id="new-game">Новая игра</button>
-    <select id="theme-select">
-      <option value="beige">Бежевый</option>
-      <option value="dark">Тёмный</option>
-      <option value="ocean">Океан</option>
-      <option value="forest">Лес</option>
-    </select>
+
+  <div class="above-game">
+    <p class="game-intro">Соединяйте числа и получите <strong>плитку 2048!</strong></p>
+    <div class="buttons-container">
+      <button class="restart-button" id="new-game">Новая игра</button>
+      <button class="undo-button" id="undo-btn" disabled>Отменить</button>
+    </div>
   </div>
-  
-  <div class="board-container" id="board-container">
-    <div class="grid-background"></div>
+
+  <div class="game-container">
+    <div class="game-message" id="game-message">
+      <p></p>
+      <div class="lower">
+        <button class="retry-button">Ещё раз</button>
+        <button class="keep-playing-button">Продолжить</button>
+      </div>
+    </div>
+
+    <div class="grid-container">
+      <div class="grid-row">
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+      </div>
+      <div class="grid-row">
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+      </div>
+      <div class="grid-row">
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+      </div>
+      <div class="grid-row">
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+      </div>
+    </div>
+
     <div class="tile-container" id="tile-container"></div>
   </div>
-  
-</div>
 
-<div class="overlay" id="game-over-overlay">
-  <div class="modal">
-    <h2 id="game-over-title">Игра окончена!</h2>
-    <p>Финальный счёт: <span id="final-score">0</span></p>
-    <button id="restart-btn">Играть снова</button>
-  </div>
-</div>
-
-<div class="overlay" id="victory-overlay">
-  <div class="modal">
-    <h2>🎉 Победа! 🎉</h2>
-    <p>Вы собрали 2048!</p>
-    <p>Счёт: <span id="victory-score">0</span></p>
-    <button id="continue-btn">Продолжить</button>
-  </div>
+  <p class="game-explanation">
+    <strong class="important">Как играть:</strong> Используйте <strong>клавиши со стрелками</strong> для перемещения плиток. Когда две плитки с одинаковым числом касаются друг друга, они <strong>сливаются в одну!</strong>
+  </p>
 </div>
 
 <script src="script.js"></script>
