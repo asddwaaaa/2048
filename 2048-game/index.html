@@ -1,56 +1,251 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>2048 — Простая игра</title>
+<title>2048 - The Game</title>
 <link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>2048</h1>
-    <div class="score-container">
-      <div class="score-box">
-        Счёт: <span class="score-value" id="score">0</span>
+<div class="game-wrapper">
+  <div class="container">
+    <header class="header">
+      <div class="title-section">
+        <h1>2048</h1>
+        <p class="tagline">Join the tiles, get to <strong>2048!</strong></p>
       </div>
-      <div class="score-box">
-        Лучший: <span class="score-value" id="best">0</span>
+      <div class="scores-section">
+        <div class="score-card current">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="score">0</span>
+          <span class="score-add" id="score-add"></span>
+        </div>
+        <div class="score-card best">
+          <span class="score-label">Best</span>
+          <span class="score-value" id="best">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls-row">
+      <div class="control-group left">
+        <button class="btn btn-primary" id="new-game">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          New Game
+        </button>
+        <button class="btn btn-secondary" id="undo-btn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 7v6h6"/>
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+          </svg>
+          Undo
+        </button>
+      </div>
+      <div class="control-group right">
+        <select id="game-mode" class="select-styled">
+          <option value="classic">Classic</option>
+          <option value="time">Time Attack</option>
+          <option value="zen">Zen Mode</option>
+        </select>
+        <select id="theme-select" class="select-styled">
+          <option value="modern">Modern</option>
+          <option value="dark">Dark</option>
+          <option value="ocean">Ocean</option>
+          <option value="sunset">Sunset</option>
+          <option value="forest">Forest</option>
+          <option value="neon">Neon</option>
+        </select>
       </div>
     </div>
+
+    <div class="game-info-bar">
+      <div class="info-item" id="moves-display">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        <span>Moves: <strong id="moves-count">0</strong></span>
+      </div>
+      <div class="info-item" id="timer-display" style="display: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+        <span id="timer">2:00</span>
+      </div>
+      <div class="info-item" id="best-tile-display">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <span>Best Tile: <strong id="best-tile">0</strong></span>
+      </div>
+    </div>
+
+    <div class="board-wrapper">
+      <div class="board-container" id="board-container">
+        <div class="grid-background" id="grid-background"></div>
+        <div class="tile-container" id="tile-container"></div>
+      </div>
+    </div>
+
+    <div class="controls-hint">
+      <span class="hint-keys">
+        <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+      </span>
+      <span class="hint-text">to move tiles</span>
+    </div>
+
+    <div class="settings-row">
+      <label class="toggle-label">
+        <input type="checkbox" id="sound-toggle" checked>
+        <span class="toggle-switch"></span>
+        <span class="toggle-text">Sound</span>
+      </label>
+      <label class="toggle-label">
+        <input type="checkbox" id="vibration-toggle" checked>
+        <span class="toggle-switch"></span>
+        <span class="toggle-text">Vibration</span>
+      </label>
+      <button class="btn btn-ghost" id="stats-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 20V10M12 20V4M6 20v-6"/>
+        </svg>
+        Stats
+      </button>
+    </div>
   </div>
-  
-  <div class="controls">
-    <button id="new-game">Новая игра</button>
-    <select id="theme-select">
-      <option value="beige">Бежевый</option>
-      <option value="dark">Тёмный</option>
-      <option value="ocean">Океан</option>
-      <option value="forest">Лес</option>
-    </select>
-  </div>
-  
-  <div class="board-container" id="board-container">
-    <div class="grid-background"></div>
-    <div class="tile-container" id="tile-container"></div>
-  </div>
-  
 </div>
 
 <div class="overlay" id="game-over-overlay">
-  <div class="modal">
-    <h2 id="game-over-title">Игра окончена!</h2>
-    <p>Финальный счёт: <span id="final-score">0</span></p>
-    <button id="restart-btn">Играть снова</button>
+  <div class="modal glass">
+    <div class="modal-icon loss">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
+        <line x1="9" y1="9" x2="9.01" y2="9"/>
+        <line x1="15" y1="9" x2="15.01" y2="9"/>
+      </svg>
+    </div>
+    <h2>Game Over!</h2>
+    <div class="modal-stats">
+      <div class="stat">
+        <span class="stat-label">Final Score</span>
+        <span class="stat-value" id="final-score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Best Tile</span>
+        <span class="stat-value" id="final-best-tile">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Moves</span>
+        <span class="stat-value" id="final-moves">0</span>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-large" id="restart-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      Try Again
+    </button>
   </div>
 </div>
 
 <div class="overlay" id="victory-overlay">
-  <div class="modal">
-    <h2>🎉 Победа! 🎉</h2>
-    <p>Вы собрали 2048!</p>
-    <p>Счёт: <span id="victory-score">0</span></p>
-    <button id="continue-btn">Продолжить</button>
+  <div class="modal glass victory">
+    <div class="modal-icon win">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+        <path d="M4 22h16"/>
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+      </svg>
+    </div>
+    <h2>You Win!</h2>
+    <p class="victory-message">You reached 2048!</p>
+    <div class="modal-stats">
+      <div class="stat">
+        <span class="stat-label">Score</span>
+        <span class="stat-value" id="victory-score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Moves</span>
+        <span class="stat-value" id="victory-moves">0</span>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn btn-secondary" id="continue-btn">Keep Playing</button>
+      <button class="btn btn-primary" id="victory-restart-btn">New Game</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="stats-overlay">
+  <div class="modal glass stats-modal">
+    <button class="modal-close" id="stats-close">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <h2>Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number" id="stat-games">0</span>
+        <span class="stat-title">Games Played</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="stat-wins">0</span>
+        <span class="stat-title">Wins</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="stat-best-score">0</span>
+        <span class="stat-title">Best Score</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="stat-highest-tile">0</span>
+        <span class="stat-title">Highest Tile</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="stat-total-moves">0</span>
+        <span class="stat-title">Total Moves</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="stat-win-rate">0%</span>
+        <span class="stat-title">Win Rate</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-small" id="reset-stats-btn">Reset Statistics</button>
+  </div>
+</div>
+
+<div class="overlay" id="time-up-overlay">
+  <div class="modal glass">
+    <div class="modal-icon loss">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    <h2>Time's Up!</h2>
+    <div class="modal-stats">
+      <div class="stat">
+        <span class="stat-label">Final Score</span>
+        <span class="stat-value" id="time-final-score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Best Tile</span>
+        <span class="stat-value" id="time-best-tile">0</span>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-large" id="time-restart-btn">Play Again</button>
   </div>
 </div>
 
