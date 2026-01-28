@@ -14,7 +14,6 @@ async def root():
 
 @app.post("/webhook")
 async def webhook(data: dict):
-    # сюда придёт webhook (Telegram / другой сервис)
     print("Webhook data:", data)
     return {"status": "received"}
 
@@ -22,15 +21,3 @@ async def webhook(data: dict):
 @app.get("/health")
 async def healthcheck():
     return {"health": "ok"}
-
-
-# Для локального запуска
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(
-        "app:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True
-    )
