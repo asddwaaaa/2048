@@ -1,1 +1,17 @@
+{
+  "name": "milk-2048",
+  "version": "1.0.0",
+  "description": "2048 Classic & Chaos game",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "build": "echo \"No build needed\""
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
 
