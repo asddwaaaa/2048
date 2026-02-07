@@ -3,7 +3,7 @@ const path = require('path');
 const app = express();
 
 // Render сам подставит нужный порт
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 8000;
 
 // Раздаём статические файлы из текущей папки
 app.use(express.static(path.join(__dirname)));
