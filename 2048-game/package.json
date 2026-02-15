@@ -1,15 +1,15 @@
 {
-  "name": "render-deploy-app",
+  "name": "milk-2048",
   "version": "1.0.0",
-  "description": "Simple Render Deployment",
-  "main": "server.js",
+  "description": "2048 Classic & Chaos game",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js"
+    "start": "serve -s . -l ${PORT:-3000} --no-port-switching"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "serve": "^14.2.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18"
   }
 }
