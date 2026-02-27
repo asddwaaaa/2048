@@ -12,7 +12,6 @@
         }
 
         :root {
-            /* Default Theme */
             --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --bg-overlay: rgba(255, 255, 255, 0.95);
             --glass-bg: rgba(255, 255, 255, 0.1);
@@ -23,7 +22,7 @@
             --grid-bg: rgba(0, 0, 0, 0.05);
             --cell-bg: rgba(0, 0, 0, 0.1);
             
-            /* Tile gradients */
+            /* Default tile colors */
             --tile-2: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
             --tile-4: linear-gradient(135deg, #ffecb3 0%, #ffd54f 100%);
             --tile-8: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
@@ -56,6 +55,17 @@
             align-items: center;
             padding: 20px;
             overflow-x: hidden;
+        }
+
+        /* Confetti Canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
         }
 
         .container {
@@ -115,6 +125,7 @@
             align-items: center;
             margin-bottom: 20px;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .title {
@@ -166,6 +177,10 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
+        .grid-container {
+            position: relative;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -201,26 +216,26 @@
             font-weight: 900;
             color: white;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transition: all 0.15s ease-out;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .tile.new {
-            animation: tileAppear 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: tileAppear 0.2s ease-out;
         }
 
         .tile.merged {
-            animation: tileMerge 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: tileMerge 0.2s ease-out;
         }
 
         @keyframes tileAppear {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            from { transform: scale(0); }
+            to { transform: scale(1); }
         }
 
         @keyframes tileMerge {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+            50% { transform: scale(1.1); }
         }
 
         .tile-2 { background: var(--tile-2); color: #776e65; }
@@ -284,7 +299,6 @@
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 15px;
-            cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -312,14 +326,12 @@
         .shop-price {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             font-size: 16px;
             font-weight: 900;
             color: var(--text-light);
-        }
-
-        .shop-item.owned {
-            border-color: #4caf50;
+            margin-bottom: 10px;
         }
 
         .shop-item.active {
@@ -463,12 +475,18 @@
             }
 
             .stats {
-                flex-direction: column;
-                gap: 8px;
+                width: 100%;
+                justify-content: space-between;
             }
 
             .stat-box {
+                flex: 1;
                 min-width: 0;
+                padding: 10px 12px;
+            }
+
+            .stat-value {
+                font-size: 20px;
             }
 
             .shop-grid {
@@ -478,6 +496,8 @@
     </style>
 </head>
 <body>
+    <canvas id="confettiCanvas"></canvas>
+
     <div class="container">
         <!-- Navigation -->
         <div class="nav">
@@ -507,25 +527,27 @@
             </div>
 
             <div class="game-board">
-                <div class="grid" id="grid">
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
+                <div class="grid-container">
+                    <div class="grid" id="grid">
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                        <div class="cell"></div>
+                    </div>
+                    <div class="tiles" id="tiles"></div>
                 </div>
-                <div class="tiles" id="tiles"></div>
             </div>
 
             <div class="controls">
@@ -543,6 +565,7 @@
                     <div class="stat-value" id="crystalsShop">0</div>
                 </div>
             </div>
+            <button class="btn" onclick="addTestCrystals()" style="width: 100%; margin-bottom: 20px; background: linear-gradient(135deg, #ffd700, #ff8c00); color: white;">🎁 Тест: +100 💎</button>
             <div class="shop-grid" id="shopGrid"></div>
         </div>
 
@@ -614,18 +637,167 @@
     </div>
 
     <script>
-        // Shop items data
+        // Confetti System
+        class ConfettiSystem {
+            constructor() {
+                this.canvas = document.getElementById('confettiCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.confetti = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createConfetti() {
+                const colors = ['#ff0080', '#00d4ff', '#ffed4e', '#4caf50', '#ff5722', '#9c27b0'];
+                for (let i = 0; i < 100; i++) {
+                    this.confetti.push({
+                        x: Math.random() * this.canvas.width,
+                        y: -10,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: Math.random() * 3 + 2,
+                        rotation: Math.random() * 360,
+                        rotationSpeed: (Math.random() - 0.5) * 10,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 8 + 4
+                    });
+                }
+                this.animate();
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.confetti = this.confetti.filter(c => {
+                    c.x += c.vx;
+                    c.y += c.vy;
+                    c.vy += 0.1;
+                    c.rotation += c.rotationSpeed;
+
+                    this.ctx.save();
+                    this.ctx.translate(c.x, c.y);
+                    this.ctx.rotate(c.rotation * Math.PI / 180);
+                    this.ctx.fillStyle = c.color;
+                    this.ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size);
+                    this.ctx.restore();
+
+                    return c.y < this.canvas.height + 10;
+                });
+
+                if (this.confetti.length > 0) {
+                    requestAnimationFrame(() => this.animate());
+                }
+            }
+        }
+
+        const confetti = new ConfettiSystem();
+
+        // Shop items data with full theme configurations
         const shopItems = [
-            {id: 'default', name: 'Стандарт', price: 0, type: 'theme', bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'},
-            {id: 'cosmic', name: 'Космос', price: 300, type: 'theme', bgGradient: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'},
-            {id: 'sakura', name: 'Сакура', price: 500, type: 'theme', bgGradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'},
-            {id: 'cyber', name: 'Киберпанк', price: 800, type: 'theme', bgGradient: 'linear-gradient(135deg, #ff00cc 0%, #333399 100%)'},
-            {id: 'lava', name: 'Лава', price: 600, type: 'theme', bgGradient: 'linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)'},
-            {id: 'ocean', name: 'Океан', price: 400, type: 'theme', bgGradient: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)'},
-            {id: 'forest', name: 'Лес', price: 450, type: 'theme', bgGradient: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)'},
-            {id: 'sunset', name: 'Закат', price: 550, type: 'theme', bgGradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'},
-            {id: 'aurora', name: 'Аврора', price: 900, type: 'theme', bgGradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)'},
-            {id: 'neon', name: 'Неон', price: 1200, type: 'theme', bgGradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'},
+            {
+                id: 'default', 
+                name: 'Стандарт', 
+                price: 0, 
+                bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                tiles: {
+                    2: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+                    4: 'linear-gradient(135deg, #ffecb3 0%, #ffd54f 100%)',
+                    8: 'linear-gradient(135deg, #ffb74d 0%, #ff9800 100%)',
+                    16: 'linear-gradient(135deg, #ff7043 0%, #ff5722 100%)',
+                    32: 'linear-gradient(135deg, #ec407a 0%, #e91e63 100%)',
+                    64: 'linear-gradient(135deg, #ab47bc 0%, #9c27b0 100%)',
+                    128: 'linear-gradient(135deg, #7e57c2 0%, #673ab7 100%)',
+                    256: 'linear-gradient(135deg, #5c6bc0 0%, #3f51b5 100%)',
+                    512: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                    1024: 'linear-gradient(135deg, #26c6da 0%, #00bcd4 100%)',
+                    2048: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                    super: 'linear-gradient(135deg, #ffd700 0%, #ffaa00 100%)'
+                }
+            },
+            {
+                id: 'cosmic', 
+                name: 'Космос', 
+                price: 300, 
+                bgGradient: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+                tiles: {
+                    2: 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+                    4: 'linear-gradient(135deg, #0f2027 0%, #203a43 100%)',
+                    8: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
+                    16: 'linear-gradient(135deg, #141e30 0%, #243b55 100%)',
+                    32: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                    64: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    128: 'linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)',
+                    256: 'linear-gradient(135deg, #fa8bff 0%, #2bd2ff 100%)',
+                    512: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%)',
+                    1024: 'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)',
+                    2048: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)',
+                    super: 'linear-gradient(135deg, #fff200 0%, #ffa800 100%)'
+                }
+            },
+            {
+                id: 'sakura', 
+                name: 'Сакура', 
+                price: 500, 
+                bgGradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                tiles: {
+                    2: 'linear-gradient(135deg, #fff0f5 0%, #ffe4e9 100%)',
+                    4: 'linear-gradient(135deg, #ffd1dc 0%, #ffb3c6 100%)',
+                    8: 'linear-gradient(135deg, #ffb3d9 0%, #ff9cc2 100%)',
+                    16: 'linear-gradient(135deg, #ff85b3 0%, #ff6ba5 100%)',
+                    32: 'linear-gradient(135deg, #ff6b9d 0%, #ff5489 100%)',
+                    64: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    128: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                    256: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+                    512: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    1024: 'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)',
+                    2048: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                    super: 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)'
+                }
+            },
+            {
+                id: 'ocean', 
+                name: 'Океан', 
+                price: 400, 
+                bgGradient: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)',
+                tiles: {
+                    2: 'linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%)',
+                    4: 'linear-gradient(135deg, #80deea 0%, #4dd0e1 100%)',
+                    8: 'linear-gradient(135deg, #26c6da 0%, #00acc1 100%)',
+                    16: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)',
+                    32: 'linear-gradient(135deg, #0097a7 0%, #00838f 100%)',
+                    64: 'linear-gradient(135deg, #006064 0%, #004d40 100%)',
+                    128: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)',
+                    256: 'linear-gradient(135deg, #0f2027 0%, #2c5364 100%)',
+                    512: 'linear-gradient(135deg, #4ca1af 0%, #c4e0e5 100%)',
+                    1024: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
+                    2048: 'linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%)',
+                    super: 'linear-gradient(135deg, #56ccf2 0%, #2f80ed 100%)'
+                }
+            },
+            {
+                id: 'sunset', 
+                name: 'Закат', 
+                price: 550, 
+                bgGradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                tiles: {
+                    2: 'linear-gradient(135deg, #fff9c4 0%, #fff59d 100%)',
+                    4: 'linear-gradient(135deg, #ffee58 0%, #fdd835 100%)',
+                    8: 'linear-gradient(135deg, #ffc107 0%, #ffb300 100%)',
+                    16: 'linear-gradient(135deg, #ff9800 0%, #ff6f00 100%)',
+                    32: 'linear-gradient(135deg, #ff6f00 0%, #e65100 100%)',
+                    64: 'linear-gradient(135deg, #ff5722 0%, #d84315 100%)',
+                    128: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    256: 'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)',
+                    512: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                    1024: 'linear-gradient(135deg, #ff9a56 0%, #ffad68 100%)',
+                    2048: 'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)',
+                    super: 'linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%)'
+                }
+            }
         ];
 
         // Game State
@@ -666,21 +838,40 @@
             }
 
             initGrid() {
-                this.grid = Array(this.size).fill(null).map(() => Array(this.size).fill(null));
+                this.grid = [];
+                for (let r = 0; r < this.size; r++) {
+                    this.grid[r] = [];
+                    for (let c = 0; c < this.size; c++) {
+                        this.grid[r][c] = null;
+                    }
+                }
             }
 
             setupControls() {
                 document.addEventListener('keydown', (e) => {
                     if (this.gameOver) return;
                     const key = e.key.toLowerCase();
-                    if (['arrowup', 'w'].includes(key)) { e.preventDefault(); this.move('up'); }
-                    else if (['arrowdown', 's'].includes(key)) { e.preventDefault(); this.move('down'); }
-                    else if (['arrowleft', 'a'].includes(key)) { e.preventDefault(); this.move('left'); }
-                    else if (['arrowright', 'd'].includes(key)) { e.preventDefault(); this.move('right'); }
+                    if (['arrowup', 'w'].includes(key)) { 
+                        e.preventDefault(); 
+                        this.move('up'); 
+                    }
+                    else if (['arrowdown', 's'].includes(key)) { 
+                        e.preventDefault(); 
+                        this.move('down'); 
+                    }
+                    else if (['arrowleft', 'a'].includes(key)) { 
+                        e.preventDefault(); 
+                        this.move('left'); 
+                    }
+                    else if (['arrowright', 'd'].includes(key)) { 
+                        e.preventDefault(); 
+                        this.move('right'); 
+                    }
                 });
 
                 let touchStartX = 0, touchStartY = 0;
                 const grid = document.getElementById('grid');
+                
                 grid.addEventListener('touchstart', (e) => {
                     touchStartX = e.touches[0].clientX;
                     touchStartY = e.touches[0].clientY;
@@ -719,7 +910,9 @@
             }
 
             saveState() {
-                if (this.undoStack.length >= this.maxUndos) this.undoStack.shift();
+                if (this.undoStack.length >= this.maxUndos) {
+                    this.undoStack.shift();
+                }
                 this.undoStack.push({
                     grid: JSON.parse(JSON.stringify(this.grid)),
                     score: this.score
@@ -739,8 +932,25 @@
             move(direction) {
                 this.saveState();
                 let moved = false;
-                const traversals = this.getTraversals(direction);
+                const vectors = {
+                    up: {r: -1, c: 0},
+                    down: {r: 1, c: 0},
+                    left: {r: 0, c: -1},
+                    right: {r: 0, c: 1}
+                };
+                const vector = vectors[direction];
+                
+                // Build traversals
+                const rows = [];
+                const cols = [];
+                for (let i = 0; i < this.size; i++) {
+                    rows.push(i);
+                    cols.push(i);
+                }
+                if (vector.r > 0) rows.reverse();
+                if (vector.c > 0) cols.reverse();
 
+                // Clear merged flags
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         if (this.grid[r][c]) {
@@ -750,18 +960,35 @@
                     }
                 }
 
-                traversals.rows.forEach(r => {
-                    traversals.cols.forEach(c => {
+                // Move tiles
+                rows.forEach(r => {
+                    cols.forEach(c => {
                         const tile = this.grid[r][c];
                         if (tile) {
-                            const farthest = this.findFarthest(r, c, direction);
-                            const next = this.getNext(farthest.r, farthest.c, direction);
-                            
-                            if (next.r >= 0 && next.r < this.size && next.c >= 0 && next.c < this.size &&
-                                this.grid[next.r][next.c] && this.grid[next.r][next.c].value === tile.value &&
-                                !this.grid[next.r][next.c].merged) {
+                            // Find farthest position
+                            let nextR = r + vector.r;
+                            let nextC = c + vector.c;
+                            let prevR = r;
+                            let prevC = c;
+
+                            while (nextR >= 0 && nextR < this.size && 
+                                   nextC >= 0 && nextC < this.size && 
+                                   !this.grid[nextR][nextC]) {
+                                prevR = nextR;
+                                prevC = nextC;
+                                nextR += vector.r;
+                                nextC += vector.c;
+                            }
+
+                            // Check if can merge
+                            if (nextR >= 0 && nextR < this.size && 
+                                nextC >= 0 && nextC < this.size &&
+                                this.grid[nextR][nextC] && 
+                                this.grid[nextR][nextC].value === tile.value &&
+                                !this.grid[nextR][nextC].merged) {
                                 
-                                this.grid[next.r][next.c] = {
+                                // Merge
+                                this.grid[nextR][nextC] = {
                                     value: tile.value * 2,
                                     id: this.tileId++,
                                     merged: true,
@@ -774,8 +1001,9 @@
                                 if (tile.value * 2 > this.stats.bestTile) {
                                     this.stats.bestTile = tile.value * 2;
                                 }
-                            } else if (farthest.r !== r || farthest.c !== c) {
-                                this.grid[farthest.r][farthest.c] = tile;
+                            } else if (prevR !== r || prevC !== c) {
+                                // Just move
+                                this.grid[prevR][prevC] = tile;
                                 this.grid[r][c] = null;
                                 moved = true;
                             }
@@ -795,36 +1023,6 @@
                 }
             }
 
-            getTraversals(direction) {
-                const rows = [0, 1, 2, 3];
-                const cols = [0, 1, 2, 3];
-                if (direction === 'down') rows.reverse();
-                if (direction === 'right') cols.reverse();
-                return { rows, cols };
-            }
-
-            findFarthest(r, c, direction) {
-                let prev = {r, c};
-                let next = this.getNext(r, c, direction);
-                
-                while (next.r >= 0 && next.r < this.size && next.c >= 0 && next.c < this.size && !this.grid[next.r][next.c]) {
-                    prev = next;
-                    next = this.getNext(next.r, next.c, direction);
-                }
-                return prev;
-            }
-
-            getNext(r, c, direction) {
-                const vectors = {
-                    up: {r: -1, c: 0},
-                    down: {r: 1, c: 0},
-                    left: {r: 0, c: -1},
-                    right: {r: 0, c: 1}
-                };
-                const v = vectors[direction];
-                return {r: r + v.r, c: c + v.c};
-            }
-
             checkWin() {
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
@@ -832,13 +1030,19 @@
                             this.won = true;
                             this.stats.wins++;
                             this.crystals += 100;
+                            
                             if (!this.achievements.first2048) {
                                 this.achievements.first2048 = true;
                                 this.crystals += 50;
                             }
+                            
                             this.saveStats();
                             this.saveCrystals();
                             this.saveAchievements();
+                            
+                            // Launch confetti
+                            confetti.createConfetti();
+                            
                             showOverlay('winOverlay');
                             return;
                         }
@@ -853,12 +1057,14 @@
             }
 
             checkGameOver() {
+                // Check for empty cells
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         if (!this.grid[r][c]) return;
                     }
                 }
 
+                // Check for possible merges
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         const val = this.grid[r][c].value;
@@ -884,13 +1090,14 @@
                 this.won = false;
                 this.gameOver = false;
                 this.undoStack = [];
+                this.tileId = 0;
                 this.init();
             }
 
             getCellPosition(r, c) {
                 const gridEl = document.getElementById('grid');
                 const rect = gridEl.getBoundingClientRect();
-                const cellSize = (rect.width - 24 - 36) / 4;
+                const cellSize = (rect.width - 24 - 36) / 4; // 24px padding, 36px gaps
                 return {
                     left: c * (cellSize + 12),
                     top: r * (cellSize + 12),
@@ -908,15 +1115,24 @@
                         if (tile) {
                             const pos = this.getCellPosition(r, c);
                             const tileEl = document.createElement('div');
-                            tileEl.className = `tile tile-${tile.value}`;
-                            if (tile.isNew) tileEl.classList.add('new');
-                            if (tile.merged) tileEl.classList.add('merged');
                             
+                            let tileClass = 'tile';
+                            if (tile.value <= 4096) {
+                                tileClass += ` tile-${tile.value}`;
+                            } else {
+                                tileClass += ' tile-super';
+                            }
+                            
+                            if (tile.isNew) tileClass += ' new';
+                            if (tile.merged) tileClass += ' merged';
+                            
+                            tileEl.className = tileClass;
                             tileEl.style.left = `${pos.left}px`;
                             tileEl.style.top = `${pos.top}px`;
                             tileEl.style.width = `${pos.size}px`;
                             tileEl.style.height = `${pos.size}px`;
                             tileEl.style.fontSize = tile.value >= 1024 ? `${pos.size * 0.35}px` : `${pos.size * 0.5}px`;
+                            tileEl.style.lineHeight = `${pos.size}px`;
                             tileEl.textContent = tile.value;
                             
                             tilesEl.appendChild(tileEl);
@@ -976,35 +1192,33 @@
             const active = localStorage.getItem('activeTheme') || 'default';
 
             grid.innerHTML = shopItems.map(item => `
-                <div class="shop-item ${owned.includes(item.id) ? 'owned' : ''} ${active === item.id ? 'active' : ''}" onclick="handleShopItem('${item.id}', ${item.price})">
-                    ${owned.includes(item.id) ? '<span class="shop-badge">✓</span>' : ''}
+                <div class="shop-item ${active === item.id ? 'active' : ''}">
                     ${active === item.id ? '<span class="shop-badge">★</span>' : ''}
                     <div class="shop-preview" style="background: ${item.bgGradient}"></div>
                     <div class="shop-name">${item.name}</div>
                     <div class="shop-price">
-                        ${owned.includes(item.id) ? 'Куплено' : `💎 ${item.price}`}
+                        ${owned.includes(item.id) ? '✓ Куплено' : `💎 ${item.price}`}
                     </div>
+                    ${owned.includes(item.id) 
+                        ? `<button class="btn" style="width: 100%; padding: 8px; font-size: 11px;" onclick="applyTheme('${item.id}')">Применить</button>`
+                        : `<button class="btn" style="width: 100%; padding: 8px; font-size: 11px;" onclick="buyTheme('${item.id}', ${item.price})">Купить</button>`
+                    }
                 </div>
             `).join('');
         }
 
-        function handleShopItem(id, price) {
-            const owned = JSON.parse(localStorage.getItem('ownedThemes')) || ['default'];
-            
-            if (owned.includes(id)) {
+        function buyTheme(id, price) {
+            if (game.crystals >= price) {
+                game.crystals -= price;
+                const owned = JSON.parse(localStorage.getItem('ownedThemes')) || ['default'];
+                owned.push(id);
+                localStorage.setItem('ownedThemes', JSON.stringify(owned));
+                game.saveCrystals();
                 applyTheme(id);
+                renderShop();
+                game.updateUI();
             } else {
-                if (game.crystals >= price) {
-                    game.crystals -= price;
-                    owned.push(id);
-                    localStorage.setItem('ownedThemes', JSON.stringify(owned));
-                    game.saveCrystals();
-                    applyTheme(id);
-                    renderShop();
-                    game.updateUI();
-                } else {
-                    alert('Недостаточно кристаллов!');
-                }
+                alert('Недостаточно кристаллов!');
             }
         }
 
@@ -1012,9 +1226,46 @@
             const item = shopItems.find(i => i.id === id);
             if (item) {
                 document.body.style.background = item.bgGradient;
+                
+                // Apply tile colors
+                const style = document.createElement('style');
+                style.id = 'theme-style';
+                const oldStyle = document.getElementById('theme-style');
+                if (oldStyle) oldStyle.remove();
+                
+                const lightTextValues = ['default', 'sakura', 'sunset'];
+                const textColor = lightTextValues.includes(id) ? '#776e65' : 'white';
+                
+                style.innerHTML = `
+                    .tile-2 { background: ${item.tiles[2]}; color: ${textColor}; }
+                    .tile-4 { background: ${item.tiles[4]}; color: ${textColor}; }
+                    .tile-8 { background: ${item.tiles[8]}; color: white; }
+                    .tile-16 { background: ${item.tiles[16]}; color: white; }
+                    .tile-32 { background: ${item.tiles[32]}; color: white; }
+                    .tile-64 { background: ${item.tiles[64]}; color: white; }
+                    .tile-128 { background: ${item.tiles[128]}; color: white; }
+                    .tile-256 { background: ${item.tiles[256]}; color: white; }
+                    .tile-512 { background: ${item.tiles[512]}; color: white; }
+                    .tile-1024 { background: ${item.tiles[1024]}; color: white; }
+                    .tile-2048 { background: ${item.tiles[2048]}; color: white; }
+                    .tile-super { background: ${item.tiles.super}; color: white; }
+                `;
+                
+                document.head.appendChild(style);
                 localStorage.setItem('activeTheme', id);
                 renderShop();
+                
+                if (game) {
+                    game.render();
+                }
             }
+        }
+
+        // Add test crystals
+        function addTestCrystals() {
+            game.crystals += 100;
+            game.saveCrystals();
+            game.updateUI();
         }
 
         // Load active theme on start
